@@ -35,7 +35,6 @@ type alias Stats =
     , chd : Float -- Critical Hit Damage
     , eff : Float -- Effectiveness
     , efr : Float -- Effect Resistance
-    , dac : Float -- Dual Attack Chance
     }
 
 
@@ -60,8 +59,10 @@ type alias Skill =
 
 type alias Modifier =
     { category : String -- defines which stat this modifier scales of
+    , target : Origin
     , section : Section -- defines if the modifier is additive or multiplicative
     , value : Float -- defines the magnitude of the modifier
+    , soulburn : Float -- defines the magnitude of the modifier while soulburned(same as value if not soulburnable)
     }
 
 
@@ -79,6 +80,11 @@ type alias Enemy =
 type Section
     = Additive
     | Multiplicative
+
+
+type Origin
+    = Self
+    | Target
 
 
 initialModel : Model
