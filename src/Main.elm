@@ -124,10 +124,10 @@ type alias Stats =
 type alias Skill =
     { isPassive : Bool
     , soulburn : Int --cost in souls, 0 means not soulburnable
-    , soulburnEffect : String -- Description what soulburning does, empty if not soulburnable
+    , soulburnEffect : Maybe String -- Description what soulburning does, empty if not soulburnable
     , cooldown : Int -- Cooldown in Turns
     , name : String
-    , description : String
+    , description : Maybe String
     , modifiers : List Modifier --list of all modifiers of the skill
     }
 
@@ -245,10 +245,10 @@ skillDecoder =
         Skill
         (Decode.at [ "isPassive" ] Decode.bool)
         (Decode.at [ "soulBurn" ] Decode.int)
-        (Decode.at [ "soulBurnEffect" ] Decode.string)
+        (Decode.maybe (Decode.at [ "soulBurnEffect" ] Decode.string))
         (Decode.at [ "cooldown" ] Decode.int)
         (Decode.at [ "name" ] Decode.string)
-        (Decode.at [ "description" ] Decode.string)
+        (Decode.maybe (Decode.at [ "description" ] Decode.string))
         (Decode.at [ "damageModifiers" ] (Decode.list modifierDecoder))
 
 
