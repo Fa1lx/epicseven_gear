@@ -17,7 +17,7 @@ type alias Model =
     , simulatedStats : Maybe Stats
     , items : List Item
     }
--- lol
+-- lol bibihiugiigu
 
 
 initialModel : () -> ( Model, Cmd Msg )
