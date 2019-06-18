@@ -2,7 +2,8 @@ module Main exposing (main)
 
 import Browser
 import Html exposing (Html, button, div, text)
-import Html.Events exposing (onClick)
+import Http
+import Json.Decode as Decode exposing (Decoder, field, string)
 
 
 
@@ -36,6 +37,7 @@ initialModel _ =
 
 type Msg
     = Loading
+    | GotHero (Result Http.Error Hero)
 
 
 
@@ -48,6 +50,9 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Loading ->
+            ( model, Cmd.none )
+
+        GotHero _ ->
             ( model, Cmd.none )
 
 
@@ -117,12 +122,12 @@ type alias Stats =
 
 
 type alias Skill =
-    { name : String
-    , isPassive : Bool
-    , description : String
-    , cooldown : Int -- Cooldown in Turns
+    { isPassive : Bool
     , soulburn : Int --cost in souls, 0 means not soulburnable
     , soulburnEffect : String -- Description what soulburning does, empty if not soulburnable
+    , cooldown : Int -- Cooldown in Turns
+    , name : String
+    , description : String
     , modifiers : List Modifier --list of all modifiers of the skill
     }
 
@@ -132,9 +137,9 @@ type alias Skill =
 
 
 type alias Modifier =
-    { category : String -- defines which stat this modifier scales of
-    , target : Origin
-    , section : Section -- defines if the modifier is additive or multiplicative
+    { category : Maybe Stat -- defines which stat this modifier scales of
+    , target : Maybe Origin
+    , section : Maybe Section -- defines if the modifier is additive or multiplicative
     , value : Float -- defines the magnitude of the modifier
     , soulburn : Float -- defines the magnitude of the modifier while soulburned(same as value if not soulburnable)
     }
@@ -188,6 +193,7 @@ type alias Enemy =
 type Section
     = Additive
     | Multiplicative
+    | Pow
 
 
 type Origin
@@ -197,3 +203,112 @@ type Origin
 
 
 -- FUNCTIONS
+-- JSON DECODER
+
+
+heroLoader : String -> Cmd Msg
+heroLoader source =
+    Http.get
+        { url = source
+        , expect = Http.expectJson GotHero heroDecoder
+        }
+
+
+heroDecoder : Decoder Hero
+heroDecoder =
+    Decode.map5
+        Hero
+        (Decode.at [ "name" ] Decode.string)
+        (Decode.at [ "rarity" ] Decode.int)
+        (Decode.at [ "element" ] Decode.string)
+        (Decode.at [ "stats", "lv60SixStarFullyAwakened" ] statsDecoder)
+        (Decode.at [ "skills" ] (Decode.list skillDecoder))
+
+
+statsDecoder : Decoder Stats
+statsDecoder =
+    Decode.map8
+        Stats
+        (Decode.at [ "atk" ] Decode.int)
+        (Decode.at [ "hp" ] Decode.int)
+        (Decode.at [ "spd" ] Decode.int)
+        (Decode.at [ "def" ] Decode.int)
+        (Decode.at [ "chc" ] Decode.float)
+        (Decode.at [ "chd" ] Decode.float)
+        (Decode.at [ "eff" ] Decode.float)
+        (Decode.at [ "efr" ] Decode.float)
+
+
+skillDecoder : Decoder Skill
+skillDecoder =
+    Decode.map7
+        Skill
+        (Decode.at [ "isPassive" ] Decode.bool)
+        (Decode.at [ "soulBurn" ] Decode.int)
+        (Decode.at [ "soulBurnEffect" ] Decode.string)
+        (Decode.at [ "cooldown" ] Decode.int)
+        (Decode.at [ "name" ] Decode.string)
+        (Decode.at [ "description" ] Decode.string)
+        (Decode.at [ "damageModifiers" ] (Decode.list modifierDecoder))
+
+
+modifierDecoder : Decoder Modifier
+modifierDecoder =
+    Decode.map5
+        Modifier
+        (Decode.maybe (Decode.at [ "stat" ] categoryDecoder))
+        (Decode.maybe (Decode.at [ "target" ] targetDecoder))
+        (Decode.maybe (Decode.at [ "section" ] sectionDecoder))
+        (Decode.at [ "value" ] Decode.float)
+        (Decode.at [ "soulburn" ] Decode.float)
+
+
+categoryDecoder : Decoder Stat
+categoryDecoder =
+    Decode.string
+        |> Decode.andThen
+            (\str ->
+                case str of
+                    "atk" ->
+                        Decode.succeed Atk
+
+                    "hp" ->
+                        Decode.succeed HP
+
+                    "spd" ->
+                        Decode.succeed Speed
+
+                    _ ->
+                        Decode.succeed Def
+            )
+
+
+targetDecoder : Decoder Origin
+targetDecoder =
+    Decode.string
+        |> Decode.andThen
+            (\str ->
+                case str of
+                    "self" ->
+                        Decode.succeed Self
+
+                    _ ->
+                        Decode.succeed Target
+            )
+
+
+sectionDecoder : Decoder Section
+sectionDecoder =
+    Decode.string
+        |> Decode.andThen
+            (\str ->
+                case str of
+                    "pow" ->
+                        Decode.succeed Pow
+
+                    "additive" ->
+                        Decode.succeed Additive
+
+                    _ ->
+                        Decode.succeed Multiplicative
+            )
