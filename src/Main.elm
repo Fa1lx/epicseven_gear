@@ -11,14 +11,11 @@ import List
 import String
 
 
-
-
 -- MODEL
 
 type alias Model =
     { name : String
     , hero : Maybe Hero
-    , baseStats : Maybe Stats
     , simulatedStats : Maybe Stats
     , items : List Item
     , addHeroButton : AddHeroButtonState
@@ -29,7 +26,6 @@ initialModel : () -> ( Model, Cmd Msg )
 initialModel _ =
     ( { name = ""
       , hero = Nothing
-      , baseStats = Nothing
       , simulatedStats = Nothing
       , items = []
       , addHeroButton = HideButtonMenu
@@ -236,10 +232,6 @@ type AddHeroButtonState
 type Ishape
     = Icircle String String (Maybe String)
     | Irectangle String String (Maybe ( String, String ))
-
---updateImage: String -> Model -> Model
---updateImage String model = 
-
 
                 
 updateAddHeroButton : AddHeroButtonMsg -> Model -> Model
