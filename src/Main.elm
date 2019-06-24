@@ -1,14 +1,19 @@
 module Main exposing (main)
 
 import Browser
-import Html exposing (Html, button, div, text)
 import Http
+import Json.Decode
 import Json.Decode as Decode exposing (Decoder, field, string)
+import Html exposing (Attribute, Html, a, button, div, h1, h2, img, p, section, i, span, text, tr, th, header, thead, table, footer)
+import Html.Attributes exposing (class, href, id, src)
+import Html.Events exposing (onClick, onInput)
+import List
+import String
+
 
 
 
 -- MODEL
-
 
 type alias Model =
     { name : String
@@ -16,8 +21,9 @@ type alias Model =
     , baseStats : Maybe Stats
     , simulatedStats : Maybe Stats
     , items : List Item
+    , addHeroButton : AddHeroButtonState
+    , imageURL : String
     }
-
 
 initialModel : () -> ( Model, Cmd Msg )
 initialModel _ =
@@ -26,6 +32,8 @@ initialModel _ =
       , baseStats = Nothing
       , simulatedStats = Nothing
       , items = []
+      , addHeroButton = HideButtonMenu
+      , imageURL = ""
       }
     , Cmd.none
     )
@@ -38,6 +46,9 @@ initialModel _ =
 type Msg
     = Loading
     | GotHero (Result Http.Error Hero)
+    | AddHeroButton AddHeroButtonMsg
+    | CloseModal
+    | HeroClicked String
 
 
 
@@ -55,16 +66,24 @@ update msg model =
         GotHero _ ->
             ( model, Cmd.none )
 
+        CloseModal ->
+            ( model , Cmd.none)
 
+        AddHeroButton addHeroButtonMsg ->
+            (updateAddHeroButton addHeroButtonMsg model,Cmd.none)
+
+        HeroClicked name ->
+            ({model | imageURL = "https://i.redd.it/oy9qpe8qvnh21.jpg"}, Cmd.none)
 
 -- VIEW
 
 
 view : Model -> Html Msg
 view model =
-    div [] []
-
-
+    div [] [ viewHeroButton model
+            , applicationHeader
+            , image model.imageURL
+    ]
 
 -- MAIN
 
@@ -205,6 +224,181 @@ type Origin
 -- FUNCTIONS
 -- JSON DECODER
 
+-- PHIL FUNs
+type AddHeroButtonMsg
+    = HideAddHeroDropdownMenu
+    | ShowAddHeroDropdownMenu
+
+type AddHeroButtonState
+    = ShowButtonMenu
+    | HideButtonMenu
+
+type Ishape
+    = Icircle String String (Maybe String)
+    | Irectangle String String (Maybe ( String, String ))
+
+--updateImage: String -> Model -> Model
+--updateImage String model = 
+
+
+                
+updateAddHeroButton : AddHeroButtonMsg -> Model -> Model
+updateAddHeroButton addHeroButtonMsg model =
+    case addHeroButtonMsg of
+        ShowAddHeroDropdownMenu ->
+            { model | addHeroButton = ShowButtonMenu }
+
+        HideAddHeroDropdownMenu ->
+            { model | addHeroButton = HideButtonMenu }
+
+applicationTitle : String.String
+applicationTitle =
+    "Epic7Seven Gear Calculator"
+
+
+applicationSubTitle : String.String
+applicationSubTitle =
+    "lol"
+
+
+applicationHeader : Html Msg
+applicationHeader =
+    div [ class "hero" ]
+        [ div [ class "hero-body" ]
+            [ div [ class "container" ]
+                [ h1 [ class "title" ] [ text applicationTitle ]
+                , h2 [ class "subtitle" ] [ text applicationSubTitle ]
+                ]
+            ]
+        ]
+
+image : String -> Html Msg
+image  s =
+    section [ class "section" ]
+        [ div [ class "container" ]
+            [ img
+                [ src s]
+                []
+            ]
+        ]
+
+viewHeroButton : Model -> Html Msg
+viewHeroButton model =
+    let
+        { dropdownText, dropdownActive, dropdownAction, dropdownIcon } =
+            case model.addHeroButton of
+                ShowButtonMenu ->
+                    { dropdownText = "Hero"
+                    , dropdownActive = " is-active"
+                    , dropdownAction = HideAddHeroDropdownMenu
+                    , dropdownIcon = "fa-angle-up"
+                    }
+
+                HideButtonMenu ->
+                    { dropdownText = "Hero"
+                    , dropdownActive = ""
+                    , dropdownAction = ShowAddHeroDropdownMenu
+                    , dropdownIcon = "fa-angle-down"
+                    }     
+    in
+    p [ class "level-item" ]
+        [ div
+            [ class ("dropdown" ++ dropdownActive)
+            , onClick (AddHeroButton dropdownAction)
+            ]
+            [ div [ class "dropdown-trigger" ]
+                [ button
+                    [ class "button  is-success"
+                    , ariaHaspopup "true"
+                    , ariaControls "dropdown-menu3"
+                    ]
+                    [ span [] [ text dropdownText ]
+                    , span [ class "icon is-small" ]
+                        [ i
+                            [ class ("fas " ++ dropdownIcon)
+                            , ariaHidden "true"
+                            ]
+                            []
+                        ]
+                    ]
+                ]
+                ,div [ class "dropdown-menu", id "dropdown-menu3" ]
+                [ div [ class "dropdown-content" ]
+                    [
+                    heroDropDownElement "Sakura"
+                    ,heroDropDownElement "Naruto"
+                    ,heroDropDownElement "Olaf"
+                    ]
+                ]
+            ]
+        ]
+
+heroDropDownElement: String -> Html Msg
+heroDropDownElement name = 
+    a
+        [ href "#"
+        , class "dropdown-item"
+        , onClickNoBubblingUp (HeroClicked name)
+        ]
+        [ text name]
+
+onClickNoBubblingUp : msg -> Attribute msg
+onClickNoBubblingUp msg =
+    Html.Events.stopPropagationOn "click" (Json.Decode.map (\m -> ( m, True )) (Json.Decode.succeed msg))
+
+machwas : Html Msg
+machwas  =
+    div [ class "modal-card" ]
+        [ modalHeader "Tabelle der Formen"
+        , section [ class "modal-card-body" ]
+            [ table [ class "table" ]
+                [ thead []
+                    [ tr []
+                        [ th [] [ text "Laufende Nummer" ]
+                        , th [] [ text "Gebietstyp" ]
+                        , th [] [ text "Gebietskoordinaten" ]
+                        ]
+                    ]
+                ]
+            ]
+        , modalFooter []
+        ]
+        
+modalHeader : String -> Html Msg
+modalHeader title =
+    header [ class "modal-card-head" ]
+        [ p [ class "modal-card-title" ] [ text title ]
+        , button [ class "delete", ariaLabel "close", onClick CloseModal ] []
+        ]
+
+
+modalFooter : List (Html Msg) -> Html Msg
+modalFooter modalButtons =
+    footer [ class "modal-card-foot" ]
+        (modalButtons
+            ++ [ button [ class "button is-success", onClick CloseModal ] [ text "Schließen" ]
+               ]
+        )
+
+ariaLabel : String -> Attribute msg
+ariaLabel value =
+    Html.Attributes.attribute "aria-label" value
+
+
+ariaHidden : String -> Attribute msg
+ariaHidden value =
+    Html.Attributes.attribute "aria-hidden" value
+
+ariaHaspopup : String -> Attribute msg
+ariaHaspopup value =
+    Html.Attributes.attribute "aria-haspopup" value
+
+
+ariaControls : String -> Attribute msg
+ariaControls value =
+    Html.Attributes.attribute "aria-controls" value
+
+-- END PHIL FUNs
 
 heroLoader : String -> Cmd Msg
 heroLoader source =
