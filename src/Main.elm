@@ -42,7 +42,7 @@ initialModel _ =
 
 
 type Msg
-    = Loading
+    = Loading String
     | GotHero (Result Http.Error Hero)
     | AddHeroButton AddHeroButtonMsg
     | CloseModal
@@ -58,11 +58,16 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Loading ->
-            ( model, Cmd.none )
+        Loading name ->
+            ( model, heroLoader (formatNameToURL name) )
 
-        GotHero _ ->
-            ( model, Cmd.none )
+        GotHero result ->
+            case result of
+                Ok loadedHero ->
+                    ( { model | hero = Just loadedHero }, Cmd.none )
+
+                Err _ ->
+                    ( model, Cmd.none )
 
         CloseModal ->
             ( model, Cmd.none )
@@ -70,21 +75,28 @@ update msg model =
         AddHeroButton addHeroButtonMsg ->
             ( updateAddHeroButton addHeroButtonMsg model, Cmd.none )
 
-        HeroClicked name addHeroButtonMsg -> 
+        HeroClicked name addHeroButtonMsg ->
             let
-                oldModel = updateAddHeroButton addHeroButtonMsg model
+                oldModel =
+                    updateAddHeroButton addHeroButtonMsg model
             in
-                ({oldModel | name = name }, Cmd.none)
+            ( { oldModel | name = name }, Cmd.none )
+
+
 
 -- VIEW
 
 
 view : Model -> Html Msg
 view model =
-    div [] [ viewHeroButton model
-            , applicationHeader
-            , image model.name
-    ]
+    div []
+        [ viewHeroButton model
+        , applicationHeader
+        , image model.name
+        , printDebug model
+        ]
+
+
 
 -- MAIN
 
@@ -227,7 +239,27 @@ type Origin
 
 formatNameToURL : String -> String
 formatNameToURL str =
-    "https://github.com/EpicSevenDB/gamedatabase/blob/master/src/hero/" ++ String.toLower (String.replace " " "-" str) ++ ".json"
+    "https://github.com/EpicSevenDB/gamedatabase/blob/master/src/hero/" ++ formatNameToFileName str ++ ".json"
+
+
+formatNameToFileName : String -> String
+formatNameToFileName str =
+    String.toLower (String.replace " & " "-" (String.replace " " "-" str))
+
+
+printDebug : Model -> Html Msg
+printDebug modell =
+    div [] [ text (createDebug modell.hero) ]
+
+
+createDebug : Maybe Hero -> String
+createDebug harald =
+    case harald of
+        Just a ->
+            String.fromInt a.rarity
+
+        Nothing ->
+            "ALARM"
 
 
 
@@ -242,7 +274,8 @@ type AddHeroButtonMsg
 type AddHeroButtonState
     = ShowButtonMenu
     | HideButtonMenu
-                
+
+
 updateAddHeroButton : AddHeroButtonMsg -> Model -> Model
 updateAddHeroButton addHeroButtonMsg model =
     case addHeroButtonMsg of
@@ -276,27 +309,48 @@ applicationHeader =
 
 
 image : String -> Html Msg
-image  name =
-    let 
-        imageurl = 
-            if name == "Charles" then  "https://i.ytimg.com/vi/5VBHVrpx1A0/maxresdefault.jpg"
-            else if name == "Bellona" then  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSSj7AbZAdTerN6TRjaI7DWQLubVh12FgfOkiMnsuisqmedvkBn"
-            else if name == "Challenger Dominiel" then  "https://epic7x.com/wp-content/uploads/2018/12/time-matter.png"
-            else if name == "Martial Artist Ken" then  ""
-            else if name == "Yufine" then ""
-            else if name == "Sez" then ""
-            else if name == "Haste" then ""
-            else if name == "Baal&Sezan" then ""
-            else if name == "Karin" then  ""
-            else if name == "Vildred" then "" 
-            else ""
+image name =
+    let
+        imageurl =
+            if name == "Charles" then
+                "https://i.ytimg.com/vi/5VBHVrpx1A0/maxresdefault.jpg"
+
+            else if name == "Bellona" then
+                "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSSj7AbZAdTerN6TRjaI7DWQLubVh12FgfOkiMnsuisqmedvkBn"
+
+            else if name == "Challenger Dominiel" then
+                "https://epic7x.com/wp-content/uploads/2018/12/time-matter.png"
+
+            else if name == "Martial Artist Ken" then
+                ""
+
+            else if name == "Yufine" then
+                ""
+
+            else if name == "Sez" then
+                ""
+
+            else if name == "Haste" then
+                ""
+
+            else if name == "Baal & Sezan" then
+                ""
+
+            else if name == "Karin" then
+                ""
+
+            else if name == "Vildred" then
+                ""
+
+            else
+                ""
     in
-        section [ class "section" ]
-            [ div [ class "container test" ]
-                [ img
-                    [  src imageurl
-                    ]
-                    []
+    section [ class "section" ]
+        [ div [ class "container test" ]
+            [ img
+                [ src imageurl
+                ]
+                []
             ]
         ]
 
@@ -343,17 +397,16 @@ viewHeroButton model =
                 ]
             , div [ class "dropdown-menu", id "dropdown-menu3" ]
                 [ div [ class "dropdown-content" ]
-                    [
-                    heroDropDownElement "Charles" 
-                    , heroDropDownElement "Bellona" 
-                    , heroDropDownElement "Challenger Dominiel" 
-                    , heroDropDownElement "Martial Artist Ken" 
+                    [ heroDropDownElement "Charles"
+                    , heroDropDownElement "Bellona"
+                    , heroDropDownElement "Challenger Dominiel"
+                    , heroDropDownElement "Martial Artist Ken"
                     , heroDropDownElement "Yufine"
-                    , heroDropDownElement "Sez" 
+                    , heroDropDownElement "Sez"
                     , heroDropDownElement "Haste"
                     , heroDropDownElement "Baal&Sezan"
                     , heroDropDownElement "Karin"
-                    , heroDropDownElement "Vildred" 
+                    , heroDropDownElement "Vildred"
                     ]
                 ]
             ]
