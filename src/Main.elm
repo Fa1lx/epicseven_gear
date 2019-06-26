@@ -1,17 +1,18 @@
 module Main exposing (main)
 
 import Browser
-import Http
-import Json.Decode
-import Json.Decode as Decode exposing (Decoder, field, string)
-import Html exposing (Attribute, Html, a, button, div, h1, h2, img, p, section, i, span, text, tr, th, header, thead, table, footer)
+import Html exposing (Attribute, Html, a, button, div, footer, h1, h2, header, i, img, p, section, span, table, text, th, thead, tr)
 import Html.Attributes exposing (class, href, id, src)
 import Html.Events exposing (onClick, onInput)
+import Http
+import Json.Decode as Decode exposing (Decoder, field, string)
 import List
 import String
 
 
+
 -- MODEL
+
 
 type alias Model =
     { name : String
@@ -21,6 +22,7 @@ type alias Model =
     , addHeroButton : AddHeroButtonState
     , imageURL : String
     }
+
 
 initialModel : () -> ( Model, Cmd Msg )
 initialModel _ =
@@ -63,10 +65,10 @@ update msg model =
             ( model, Cmd.none )
 
         CloseModal ->
-            ( model , Cmd.none)
+            ( model, Cmd.none )
 
         AddHeroButton addHeroButtonMsg ->
-            (updateAddHeroButton addHeroButtonMsg model,Cmd.none)
+            ( updateAddHeroButton addHeroButtonMsg model, Cmd.none )
 
         HeroClicked name addHeroButtonMsg -> 
             let
@@ -165,8 +167,7 @@ type alias Modifier =
 
 type alias Item =
     { slot : Slot
-    , implicit : ( Float, Stat )
-    , affixes : List ( Float, Stat )
+    , affixes : List ( Int, Stat )
     }
 
 
@@ -177,6 +178,7 @@ type Slot
     | Necklace
     | Ring
     | Boots
+    | Artifact
 
 
 type Stat
@@ -221,12 +223,21 @@ type Origin
 
 
 -- FUNCTIONS
--- JSON DECODER
+
+
+formatNameToURL : String -> String
+formatNameToURL str =
+    "https://github.com/EpicSevenDB/gamedatabase/blob/master/src/hero/" ++ String.toLower (String.replace " " "-" str) ++ ".json"
+
+
 
 -- PHIL FUNs
+
+
 type AddHeroButtonMsg
     = HideAddHeroDropdownMenu
     | ShowAddHeroDropdownMenu
+
 
 type AddHeroButtonState
     = ShowButtonMenu
@@ -240,6 +251,7 @@ updateAddHeroButton addHeroButtonMsg model =
 
         HideAddHeroDropdownMenu ->
             { model | addHeroButton = HideButtonMenu }
+
 
 applicationTitle : String.String
 applicationTitle =
@@ -261,6 +273,7 @@ applicationHeader =
                 ]
             ]
         ]
+
 
 image : String -> Html Msg
 image  name =
@@ -287,6 +300,7 @@ image  name =
             ]
         ]
 
+
 viewHeroButton : Model -> Html Msg
 viewHeroButton model =
     let
@@ -304,7 +318,7 @@ viewHeroButton model =
                     , dropdownActive = ""
                     , dropdownAction = ShowAddHeroDropdownMenu
                     , dropdownIcon = "fa-angle-down"
-                    }     
+                    }
     in
     p [ class "level-item" ]
         [ div
@@ -327,7 +341,7 @@ viewHeroButton model =
                         ]
                     ]
                 ]
-                ,div [ class "dropdown-menu", id "dropdown-menu3" ]
+            , div [ class "dropdown-menu", id "dropdown-menu3" ]
                 [ div [ class "dropdown-content" ]
                     [
                     heroDropDownElement "Charles" 
@@ -345,21 +359,24 @@ viewHeroButton model =
             ]
         ]
 
-heroDropDownElement: String -> Html Msg
-heroDropDownElement name = 
+
+heroDropDownElement : String -> Html Msg
+heroDropDownElement name =
     a
         [ href "#"
         , class "dropdown-item"
         , onClickNoBubblingUp (HeroClicked name HideAddHeroDropdownMenu)
         ]
-        [ text name]
+        [ text name ]
+
 
 onClickNoBubblingUp : msg -> Attribute msg
 onClickNoBubblingUp msg =
-    Html.Events.stopPropagationOn "click" (Json.Decode.map (\m -> ( m, True )) (Json.Decode.succeed msg))
+    Html.Events.stopPropagationOn "click" (Decode.map (\m -> ( m, True )) (Decode.succeed msg))
+
 
 machwas : Html Msg
-machwas  =
+machwas =
     div [ class "modal-card" ]
         [ modalHeader "Tabelle der Formen"
         , section [ class "modal-card-body" ]
@@ -375,7 +392,8 @@ machwas  =
             ]
         , modalFooter []
         ]
-        
+
+
 modalHeader : String -> Html Msg
 modalHeader title =
     header [ class "modal-card-head" ]
@@ -392,6 +410,7 @@ modalFooter modalButtons =
                ]
         )
 
+
 ariaLabel : String -> Attribute msg
 ariaLabel value =
     Html.Attributes.attribute "aria-label" value
@@ -400,6 +419,7 @@ ariaLabel value =
 ariaHidden : String -> Attribute msg
 ariaHidden value =
     Html.Attributes.attribute "aria-hidden" value
+
 
 ariaHaspopup : String -> Attribute msg
 ariaHaspopup value =
@@ -410,7 +430,11 @@ ariaControls : String -> Attribute msg
 ariaControls value =
     Html.Attributes.attribute "aria-controls" value
 
+
+
 -- END PHIL FUNs
+-- JSON DECODER
+
 
 heroLoader : String -> Cmd Msg
 heroLoader source =
