@@ -1,8 +1,8 @@
 module Main exposing (main)
 
 import Browser
-import Html exposing (Attribute, Html, a, button, div, footer, h1, h2, header, i, img, p, section, span, table, text, th, thead, tr)
-import Html.Attributes exposing (class, href, id, src)
+import Html exposing (Attribute, Html, a, node, button, div, footer, h1, h2, header, i, img, p, section, span, table, text, th, thead, tr)
+import Html.Attributes exposing (name, class, href, id, src, usemap, shape, coords)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Decode as Decode exposing (Decoder, field, string)
@@ -265,6 +265,14 @@ createDebug harald =
 
 -- PHIL FUNs
 
+imgMap : List (Attribute msg) -> List (Html msg) -> Html msg
+imgMap attributes children =
+    node "map" attributes children
+
+area : List (Attribute msg) -> List (Html msg) -> Html msg
+area attributes children =
+    node "area" attributes children
+
 
 type AddHeroButtonMsg
     = HideAddHeroDropdownMenu
@@ -313,34 +321,34 @@ image name =
     let
         imageurl =
             if name == "Charles" then
-                "https://i.ytimg.com/vi/5VBHVrpx1A0/maxresdefault.jpg"
+                "src/hero_images/charles.jpg"
 
             else if name == "Bellona" then
-                "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSSj7AbZAdTerN6TRjaI7DWQLubVh12FgfOkiMnsuisqmedvkBn"
+                "src/hero_images/baal-sezan.jpg"
 
             else if name == "Challenger Dominiel" then
-                "https://epic7x.com/wp-content/uploads/2018/12/time-matter.png"
+                "src/hero_images/challenger-dominiel.jpg"
 
             else if name == "Martial Artist Ken" then
-                ""
+                "src/hero_images/martial-artist-ken.jpg"
 
             else if name == "Yufine" then
-                ""
+                "src/hero_images/yufine.jpg"
 
             else if name == "Sez" then
-                ""
+                "src/hero_images/sez.jpg"
 
             else if name == "Haste" then
-                ""
+                "src/hero_images/haste.jpg"
 
-            else if name == "Baal & Sezan" then
-                ""
+            else if name == "Baal&Sezan" then
+                "src/hero_images/baal-sezan.jpg"
 
             else if name == "Karin" then
-                ""
+                "src/hero_images/Karin.jpg"
 
             else if name == "Vildred" then
-                ""
+                "src/hero_images/vildred.jpg"
 
             else
                 ""
@@ -348,9 +356,8 @@ image name =
     section [ class "section" ]
         [ div [ class "container test" ]
             [ img
-                [ src imageurl
-                ]
-                []
+                [ src imageurl, class "test2"  , usemap "#my_map"][]
+                , imgMap [ Html.Attributes.name "my_map"][area [href "http://www.studip.uni-halle.de", shape "Rectangle", coords "0,0,100,100" ][]]
             ]
         ]
 
