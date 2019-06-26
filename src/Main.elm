@@ -80,7 +80,7 @@ update msg model =
                 oldModel =
                     updateAddHeroButton addHeroButtonMsg model
             in
-            ( { oldModel | name = name }, Cmd.none )
+            ( { oldModel | name = name }, heroLoader (formatNameToURL name) )
 
 
 
@@ -239,7 +239,7 @@ type Origin
 
 formatNameToURL : String -> String
 formatNameToURL str =
-    "https://github.com/EpicSevenDB/gamedatabase/blob/master/src/hero/" ++ formatNameToFileName str ++ ".json"
+    "src/hero-json/baal-sezan.json" ++ formatNameToFileName str ++ ".json"
 
 
 formatNameToFileName : String -> String
