@@ -44,7 +44,7 @@ type Msg
     | GotHero (Result Http.Error Hero)
     | AddHeroButton AddHeroButtonMsg
     | CloseModal
-    | HeroClicked String
+    | HeroClicked String AddHeroButtonMsg
 
 
 
@@ -68,8 +68,11 @@ update msg model =
         AddHeroButton addHeroButtonMsg ->
             (updateAddHeroButton addHeroButtonMsg model,Cmd.none)
 
-        HeroClicked name ->
-            ({model | imageURL = "https://i.redd.it/oy9qpe8qvnh21.jpg"}, Cmd.none)
+        HeroClicked name addHeroButtonMsg -> 
+            let
+                oldModel = updateAddHeroButton addHeroButtonMsg model
+            in
+                ({oldModel | name = name }, Cmd.none)
 
 -- VIEW
 
@@ -78,7 +81,7 @@ view : Model -> Html Msg
 view model =
     div [] [ viewHeroButton model
             , applicationHeader
-            , image model.imageURL
+            , image model.name
     ]
 
 -- MAIN
@@ -228,11 +231,6 @@ type AddHeroButtonMsg
 type AddHeroButtonState
     = ShowButtonMenu
     | HideButtonMenu
-
-type Ishape
-    = Icircle String String (Maybe String)
-    | Irectangle String String (Maybe ( String, String ))
-
                 
 updateAddHeroButton : AddHeroButtonMsg -> Model -> Model
 updateAddHeroButton addHeroButtonMsg model =
@@ -265,12 +263,27 @@ applicationHeader =
         ]
 
 image : String -> Html Msg
-image  s =
-    section [ class "section" ]
-        [ div [ class "container" ]
-            [ img
-                [ src s]
-                []
+image  name =
+    let 
+        imageurl = 
+            if name == "Charles" then  "https://i.ytimg.com/vi/5VBHVrpx1A0/maxresdefault.jpg"
+            else if name == "Bellona" then  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSSj7AbZAdTerN6TRjaI7DWQLubVh12FgfOkiMnsuisqmedvkBn"
+            else if name == "Challenger Dominiel" then  "https://epic7x.com/wp-content/uploads/2018/12/time-matter.png"
+            else if name == "Martial Artist Ken" then  ""
+            else if name == "Yufine" then ""
+            else if name == "Sez" then ""
+            else if name == "Haste" then ""
+            else if name == "Baal&Sezan" then ""
+            else if name == "Karin" then  ""
+            else if name == "Vildred" then "" 
+            else ""
+    in
+        section [ class "section" ]
+            [ div [ class "container test" ]
+                [ img
+                    [  src imageurl
+                    ]
+                    []
             ]
         ]
 
@@ -300,7 +313,7 @@ viewHeroButton model =
             ]
             [ div [ class "dropdown-trigger" ]
                 [ button
-                    [ class "button  is-success"
+                    [ class "button  is-info is-large is-rounded"
                     , ariaHaspopup "true"
                     , ariaControls "dropdown-menu3"
                     ]
@@ -317,9 +330,16 @@ viewHeroButton model =
                 ,div [ class "dropdown-menu", id "dropdown-menu3" ]
                 [ div [ class "dropdown-content" ]
                     [
-                    heroDropDownElement "Sakura"
-                    ,heroDropDownElement "Naruto"
-                    ,heroDropDownElement "Olaf"
+                    heroDropDownElement "Charles" 
+                    , heroDropDownElement "Bellona" 
+                    , heroDropDownElement "Challenger Dominiel" 
+                    , heroDropDownElement "Martial Artist Ken" 
+                    , heroDropDownElement "Yufine"
+                    , heroDropDownElement "Sez" 
+                    , heroDropDownElement "Haste"
+                    , heroDropDownElement "Baal&Sezan"
+                    , heroDropDownElement "Karin"
+                    , heroDropDownElement "Vildred" 
                     ]
                 ]
             ]
@@ -330,7 +350,7 @@ heroDropDownElement name =
     a
         [ href "#"
         , class "dropdown-item"
-        , onClickNoBubblingUp (HeroClicked name)
+        , onClickNoBubblingUp (HeroClicked name HideAddHeroDropdownMenu)
         ]
         [ text name]
 

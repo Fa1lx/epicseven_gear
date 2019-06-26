@@ -4790,7 +4790,7 @@ var elm$core$Platform$Cmd$batch = _Platform_batch;
 var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var author$project$Main$initialModel = function (_n0) {
 	return _Utils_Tuple2(
-		{addHeroButton: author$project$Main$HideButtonMenu, baseStats: elm$core$Maybe$Nothing, hero: elm$core$Maybe$Nothing, imageURL: '', items: _List_Nil, name: '', simulatedStats: elm$core$Maybe$Nothing},
+		{addHeroButton: author$project$Main$HideButtonMenu, hero: elm$core$Maybe$Nothing, imageURL: '', items: _List_Nil, name: '', simulatedStats: elm$core$Maybe$Nothing},
 		elm$core$Platform$Cmd$none);
 };
 var elm$core$Platform$Sub$batch = _Platform_batch;
@@ -4827,10 +4827,12 @@ var author$project$Main$update = F2(
 					elm$core$Platform$Cmd$none);
 			default:
 				var name = msg.a;
+				var addHeroButtonMsg = msg.b;
+				var oldModel = A2(author$project$Main$updateAddHeroButton, addHeroButtonMsg, model);
 				return _Utils_Tuple2(
 					_Utils_update(
-						model,
-						{imageURL: 'https://i.redd.it/oy9qpe8qvnh21.jpg'}),
+						oldModel,
+						{name: name}),
 					elm$core$Platform$Cmd$none);
 		}
 	});
@@ -4923,7 +4925,8 @@ var elm$html$Html$Attributes$src = function (url) {
 		'src',
 		_VirtualDom_noJavaScriptOrHtmlUri(url));
 };
-var author$project$Main$image = function (s) {
+var author$project$Main$image = function (name) {
+	var imageurl = (name === 'Charles') ? 'https://i.ytimg.com/vi/5VBHVrpx1A0/maxresdefault.jpg' : ((name === 'Bellona') ? 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSSj7AbZAdTerN6TRjaI7DWQLubVh12FgfOkiMnsuisqmedvkBn' : ((name === 'Challenger Dominiel') ? 'https://epic7x.com/wp-content/uploads/2018/12/time-matter.png' : ((name === 'Martial Artist Ken') ? '' : ((name === 'Yufine') ? '' : ((name === 'Sez') ? '' : ((name === 'Haste') ? '' : ((name === 'Baal&Sezan') ? '' : ((name === 'Karin') ? '' : ((name === 'Vildred') ? '' : '')))))))));
 	return A2(
 		elm$html$Html$section,
 		_List_fromArray(
@@ -4936,7 +4939,7 @@ var author$project$Main$image = function (s) {
 				elm$html$Html$div,
 				_List_fromArray(
 					[
-						elm$html$Html$Attributes$class('container')
+						elm$html$Html$Attributes$class('container test')
 					]),
 				_List_fromArray(
 					[
@@ -4944,7 +4947,7 @@ var author$project$Main$image = function (s) {
 						elm$html$Html$img,
 						_List_fromArray(
 							[
-								elm$html$Html$Attributes$src(s)
+								elm$html$Html$Attributes$src(imageurl)
 							]),
 						_List_Nil)
 					]))
@@ -4972,9 +4975,10 @@ var author$project$Main$ariaHaspopup = function (value) {
 var author$project$Main$ariaHidden = function (value) {
 	return A2(elm$html$Html$Attributes$attribute, 'aria-hidden', value);
 };
-var author$project$Main$HeroClicked = function (a) {
-	return {$: 'HeroClicked', a: a};
-};
+var author$project$Main$HeroClicked = F2(
+	function (a, b) {
+		return {$: 'HeroClicked', a: a, b: b};
+	});
 var elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
 	return {$: 'MayStopPropagation', a: a};
 };
@@ -5012,7 +5016,7 @@ var author$project$Main$heroDropDownElement = function (name) {
 				elm$html$Html$Attributes$href('#'),
 				elm$html$Html$Attributes$class('dropdown-item'),
 				author$project$Main$onClickNoBubblingUp(
-				author$project$Main$HeroClicked(name))
+				A2(author$project$Main$HeroClicked, name, author$project$Main$HideAddHeroDropdownMenu))
 			]),
 		_List_fromArray(
 			[
@@ -5083,7 +5087,7 @@ var author$project$Main$viewHeroButton = function (model) {
 								elm$html$Html$button,
 								_List_fromArray(
 									[
-										elm$html$Html$Attributes$class('button  is-success'),
+										elm$html$Html$Attributes$class('button  is-info is-large is-rounded'),
 										author$project$Main$ariaHaspopup('true'),
 										author$project$Main$ariaControls('dropdown-menu3')
 									]),
@@ -5132,9 +5136,16 @@ var author$project$Main$viewHeroButton = function (model) {
 									]),
 								_List_fromArray(
 									[
-										author$project$Main$heroDropDownElement('Sakura'),
-										author$project$Main$heroDropDownElement('Naruto'),
-										author$project$Main$heroDropDownElement('Olaf')
+										author$project$Main$heroDropDownElement('Charles'),
+										author$project$Main$heroDropDownElement('Bellona'),
+										author$project$Main$heroDropDownElement('Challenger Dominiel'),
+										author$project$Main$heroDropDownElement('Martial Artist Ken'),
+										author$project$Main$heroDropDownElement('Yufine'),
+										author$project$Main$heroDropDownElement('Sez'),
+										author$project$Main$heroDropDownElement('Haste'),
+										author$project$Main$heroDropDownElement('Baal&Sezan'),
+										author$project$Main$heroDropDownElement('Karin'),
+										author$project$Main$heroDropDownElement('Vildred')
 									]))
 							]))
 					]))
@@ -5148,7 +5159,7 @@ var author$project$Main$view = function (model) {
 			[
 				author$project$Main$viewHeroButton(model),
 				author$project$Main$applicationHeader,
-				author$project$Main$image(model.imageURL)
+				author$project$Main$image(model.name)
 			]));
 };
 var elm$browser$Browser$External = function (a) {
