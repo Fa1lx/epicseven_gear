@@ -2,7 +2,7 @@ module Main exposing (main)
 
 import Browser
 import Html exposing (Attribute, Html, a, button, div, footer, h1, h2, header, i, img, node, p, section, span, table, text, th, thead, tr)
-import Html.Attributes exposing (class, coords, href, id, name, shape, src, usemap, style)
+import Html.Attributes exposing (class, coords, href, id, name, shape, src, style, usemap)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Decode as Decode exposing (Decoder, field, string)
@@ -253,37 +253,45 @@ formatNameToFileName str =
 
 -- PHIL FUNs
 
+
 showStats : Stats -> Html Msg
 showStats stats =
-    div[class "box statsbox"] [
-      p [class "title is-5"] [text "Stats"]
-      , table [class "table" , class "table is-narrow is-fullwidth"]
-                [ thead []
-                    [ tr []
-                        [ Html.td [] [ text "Attack" ]
-                        , Html.td [] [ text (String.fromInt stats.atk) ]
-                        ]
-                    ,tr [][Html.td [] [ text "Critical Hit Chance" ]
-                        , Html.td [] [ text (String.fromFloat stats.chc) ]
+    div [ class "box statsbox" ]
+        [ p [ class "title is-5" ] [ text "Stats" ]
+        , table [ class "table", class "table is-narrow is-fullwidth" ]
+            [ thead []
+                [ tr []
+                    [ Html.td [] [ text "Attack" ]
+                    , Html.td [] [ text (String.fromInt stats.atk) ]
                     ]
-                    ,tr [][Html.td [] [ text "Defense" ]
-                        , Html.td [] [ text (String.fromInt stats.def) ]
+                , tr []
+                    [ Html.td [] [ text "Critical Hit Chance" ]
+                    , Html.td [] [ text (String.fromFloat stats.chc) ]
                     ]
-                    ,tr [][Html.td [] [ text "Effectiveness" ]
-                        , Html.td [] [ text (String.fromFloat stats.eff) ]
+                , tr []
+                    [ Html.td [] [ text "Defense" ]
+                    , Html.td [] [ text (String.fromInt stats.def) ]
                     ]
-                    ,tr [][Html.td [] [ text "Effect Resistance" ]
-                        , Html.td [] [ text (String.fromFloat stats.efr) ]
+                , tr []
+                    [ Html.td [] [ text "Effectiveness" ]
+                    , Html.td [] [ text (String.fromFloat stats.eff) ]
                     ]
-                    ,tr [][Html.td [] [ text "Hitpoints" ]
-                        , Html.td [] [ text (String.fromInt stats.hp) ]
+                , tr []
+                    [ Html.td [] [ text "Effect Resistance" ]
+                    , Html.td [] [ text (String.fromFloat stats.efr) ]
                     ]
-                    ,tr [][Html.td [] [ text "Speed" ]
-                        , Html.td [] [ text (String.fromInt stats.spd) ]
+                , tr []
+                    [ Html.td [] [ text "Hitpoints" ]
+                    , Html.td [] [ text (String.fromInt stats.hp) ]
                     ]
+                , tr []
+                    [ Html.td [] [ text "Speed" ]
+                    , Html.td [] [ text (String.fromInt stats.spd) ]
                     ]
                 ]
-    ]
+            ]
+        ]
+
 
 imgMap : List (Attribute msg) -> List (Html msg) -> Html msg
 imgMap attributes children =
@@ -338,7 +346,7 @@ applicationHeader =
 
 
 image : String -> Stats -> Html Msg
-image name stats=
+image name stats =
     let
         imageurl =
             if name == "Charles" then
@@ -377,13 +385,20 @@ image name stats=
     section [ class "section" ]
         [ div [ class "container test" ]
             [ img
-                [ src imageurl, class "test2"]
+                [ src imageurl, class "test2" ]
                 []
-            , div[class "itemimg"][img[onClick (HeroClicked "" HideAddHeroDropdownMenu) , src imageurl][]
-                , imgMap [ Html.Attributes.name "my_map" ] [ area [shape "Rectangle", coords "0,0,100,100" ] [] ]]
-            , if name /= "" then showStats stats else div[][]
+            , div [ class "itemimg" ]
+                [ img [ onClick (HeroClicked "" HideAddHeroDropdownMenu), src imageurl ] []
+                , imgMap [ Html.Attributes.name "my_map" ] [ area [ shape "Rectangle", coords "0,0,100,100" ] [] ]
+                ]
+            , if name /= "" then
+                showStats stats
+
+              else
+                div [] []
             ]
         ]
+
 
 viewHeroButton : Model -> Html Msg
 viewHeroButton model =
