@@ -1,8 +1,8 @@
 module Main exposing (main)
 
 import Browser
-import Html exposing (Attribute, Html, a, node, button, div, footer, h1, h2, header, i, img, p, section, span, table, text, th, thead, tr)
-import Html.Attributes exposing (name, class, href, id, src, usemap, shape, coords)
+import Html exposing (Attribute, Html, a, button, div, footer, h1, h2, header, i, img, node, p, section, span, table, text, th, thead, tr)
+import Html.Attributes exposing (class, coords, href, id, name, shape, src, usemap)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Decode as Decode exposing (Decoder, field, string)
@@ -17,7 +17,7 @@ import String
 type alias Model =
     { name : String
     , hero : Maybe Hero
-    , simulatedStats : Maybe Stats
+    , simulatedStats : Stats
     , items : List Item
     , addHeroButton : AddHeroButtonState
     , imageURL : String
@@ -28,7 +28,7 @@ initialModel : () -> ( Model, Cmd Msg )
 initialModel _ =
     ( { name = ""
       , hero = Nothing
-      , simulatedStats = Nothing
+      , simulatedStats = initStats
       , items = []
       , addHeroButton = HideButtonMenu
       , imageURL = ""
@@ -93,7 +93,6 @@ view model =
         [ viewHeroButton model
         , applicationHeader
         , image model.name
-        , printDebug model
         ]
 
 
@@ -147,6 +146,10 @@ type alias Stats =
     , eff : Float -- Effectiveness
     , efr : Float -- Effect Resistance
     }
+
+
+initStats =
+    Stats 0 0 0 0 0.0 0.0 0.0 0.0
 
 
 
@@ -239,7 +242,7 @@ type Origin
 
 formatNameToURL : String -> String
 formatNameToURL str =
-    "src/hero-json/baal-sezan.json" ++ formatNameToFileName str ++ ".json"
+    "src/hero-json/" ++ formatNameToFileName str ++ ".json"
 
 
 formatNameToFileName : String -> String
@@ -247,27 +250,14 @@ formatNameToFileName str =
     String.toLower (String.replace " & " "-" (String.replace " " "-" str))
 
 
-printDebug : Model -> Html Msg
-printDebug modell =
-    div [] [ text (createDebug modell.hero) ]
-
-
-createDebug : Maybe Hero -> String
-createDebug harald =
-    case harald of
-        Just a ->
-            String.fromInt a.rarity
-
-        Nothing ->
-            "ALARM"
-
-
 
 -- PHIL FUNs
+
 
 imgMap : List (Attribute msg) -> List (Html msg) -> Html msg
 imgMap attributes children =
     node "map" attributes children
+
 
 area : List (Attribute msg) -> List (Html msg) -> Html msg
 area attributes children =
@@ -324,7 +314,7 @@ image name =
                 "src/hero_images/charles.jpg"
 
             else if name == "Bellona" then
-                "src/hero_images/baal-sezan.jpg"
+                "src/hero_images/bellona.jpg"
 
             else if name == "Challenger Dominiel" then
                 "src/hero_images/challenger-dominiel.jpg"
@@ -356,8 +346,9 @@ image name =
     section [ class "section" ]
         [ div [ class "container test" ]
             [ img
-                [ src imageurl, class "test2"  , usemap "#my_map"][]
-                , imgMap [ Html.Attributes.name "my_map"][area [href "http://www.studip.uni-halle.de", shape "Rectangle", coords "0,0,100,100" ][]]
+                [ src imageurl, class "test2", usemap "#my_map" ]
+                []
+            , imgMap [ Html.Attributes.name "my_map" ] [ area [ href "http://www.studip.uni-halle.de", shape "Rectangle", coords "0,0,100,100" ] [] ]
             ]
         ]
 

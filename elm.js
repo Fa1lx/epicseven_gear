@@ -6804,16 +6804,39 @@ var author$project$Main$applicationHeader = A2(
 						]))
 				]))
 		]));
+var elm$virtual_dom$VirtualDom$node = function (tag) {
+	return _VirtualDom_node(
+		_VirtualDom_noScript(tag));
+};
+var elm$html$Html$node = elm$virtual_dom$VirtualDom$node;
+var author$project$Main$area = F2(
+	function (attributes, children) {
+		return A3(elm$html$Html$node, 'area', attributes, children);
+	});
+var author$project$Main$imgMap = F2(
+	function (attributes, children) {
+		return A3(elm$html$Html$node, 'map', attributes, children);
+	});
 var elm$html$Html$img = _VirtualDom_node('img');
 var elm$html$Html$section = _VirtualDom_node('section');
+var elm$html$Html$Attributes$coords = elm$html$Html$Attributes$stringProperty('coords');
+var elm$html$Html$Attributes$href = function (url) {
+	return A2(
+		elm$html$Html$Attributes$stringProperty,
+		'href',
+		_VirtualDom_noJavaScriptUri(url));
+};
+var elm$html$Html$Attributes$name = elm$html$Html$Attributes$stringProperty('name');
+var elm$html$Html$Attributes$shape = elm$html$Html$Attributes$stringProperty('shape');
 var elm$html$Html$Attributes$src = function (url) {
 	return A2(
 		elm$html$Html$Attributes$stringProperty,
 		'src',
 		_VirtualDom_noJavaScriptOrHtmlUri(url));
 };
+var elm$html$Html$Attributes$usemap = elm$html$Html$Attributes$stringProperty('useMap');
 var author$project$Main$image = function (name) {
-	var imageurl = (name === 'Charles') ? 'https://i.ytimg.com/vi/5VBHVrpx1A0/maxresdefault.jpg' : ((name === 'Bellona') ? 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSSj7AbZAdTerN6TRjaI7DWQLubVh12FgfOkiMnsuisqmedvkBn' : ((name === 'Challenger Dominiel') ? 'https://epic7x.com/wp-content/uploads/2018/12/time-matter.png' : ((name === 'Martial Artist Ken') ? '' : ((name === 'Yufine') ? '' : ((name === 'Sez') ? '' : ((name === 'Haste') ? '' : ((name === 'Baal & Sezan') ? '' : ((name === 'Karin') ? '' : ((name === 'Vildred') ? '' : '')))))))));
+	var imageurl = (name === 'Charles') ? 'src/hero_images/charles.jpg' : ((name === 'Bellona') ? 'src/hero_images/bellona.jpg' : ((name === 'Challenger Dominiel') ? 'src/hero_images/challenger-dominiel.jpg' : ((name === 'Martial Artist Ken') ? 'src/hero_images/martial-artist-ken.jpg' : ((name === 'Yufine') ? 'src/hero_images/yufine.jpg' : ((name === 'Sez') ? 'src/hero_images/sez.jpg' : ((name === 'Haste') ? 'src/hero_images/haste.jpg' : ((name === 'Baal&Sezan') ? 'src/hero_images/baal-sezan.jpg' : ((name === 'Karin') ? 'src/hero_images/Karin.jpg' : ((name === 'Vildred') ? 'src/hero_images/vildred.jpg' : '')))))))));
 	return A2(
 		elm$html$Html$section,
 		_List_fromArray(
@@ -6834,28 +6857,30 @@ var author$project$Main$image = function (name) {
 						elm$html$Html$img,
 						_List_fromArray(
 							[
-								elm$html$Html$Attributes$src(imageurl)
+								elm$html$Html$Attributes$src(imageurl),
+								elm$html$Html$Attributes$class('test2'),
+								elm$html$Html$Attributes$usemap('#my_map')
 							]),
-						_List_Nil)
+						_List_Nil),
+						A2(
+						author$project$Main$imgMap,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$name('my_map')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								author$project$Main$area,
+								_List_fromArray(
+									[
+										elm$html$Html$Attributes$href('http://www.studip.uni-halle.de'),
+										elm$html$Html$Attributes$shape('Rectangle'),
+										elm$html$Html$Attributes$coords('0,0,100,100')
+									]),
+								_List_Nil)
+							]))
 					]))
-			]));
-};
-var author$project$Main$createDebug = function (harald) {
-	if (harald.$ === 'Just') {
-		var a = harald.a;
-		return elm$core$String$fromInt(a.rarity);
-	} else {
-		return 'ALARM';
-	}
-};
-var author$project$Main$printDebug = function (modell) {
-	return A2(
-		elm$html$Html$div,
-		_List_Nil,
-		_List_fromArray(
-			[
-				elm$html$Html$text(
-				author$project$Main$createDebug(modell.hero))
 			]));
 };
 var author$project$Main$AddHeroButton = function (a) {
@@ -6907,12 +6932,6 @@ var author$project$Main$onClickNoBubblingUp = function (msg) {
 			elm$json$Json$Decode$succeed(msg)));
 };
 var elm$html$Html$a = _VirtualDom_node('a');
-var elm$html$Html$Attributes$href = function (url) {
-	return A2(
-		elm$html$Html$Attributes$stringProperty,
-		'href',
-		_VirtualDom_noJavaScriptUri(url));
-};
 var author$project$Main$heroDropDownElement = function (name) {
 	return A2(
 		elm$html$Html$a,
@@ -7064,8 +7083,7 @@ var author$project$Main$view = function (model) {
 			[
 				author$project$Main$viewHeroButton(model),
 				author$project$Main$applicationHeader,
-				author$project$Main$image(model.name),
-				author$project$Main$printDebug(model)
+				author$project$Main$image(model.name)
 			]));
 };
 var elm$browser$Browser$External = function (a) {
@@ -8584,11 +8602,6 @@ var elm$browser$Debugger$History$consMsg = F3(
 				A4(elm$html$Html$Lazy$lazy3, elm$browser$Debugger$History$viewMessage, currentIndex, index, msg),
 				rest));
 	});
-var elm$virtual_dom$VirtualDom$node = function (tag) {
-	return _VirtualDom_node(
-		_VirtualDom_noScript(tag));
-};
-var elm$html$Html$node = elm$virtual_dom$VirtualDom$node;
 var elm$browser$Debugger$History$styles = A3(
 	elm$html$Html$node,
 	'style',
