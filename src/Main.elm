@@ -754,14 +754,3 @@ sectionDecoder =
 
 
 -- Helper functions
-
-
-join : List (List a) -> List a
-join =
-    List.foldr (++) []
-
-
-flatMap : (a -> List b) -> List a -> List b
-flatMap f list =
-    List.map f list
-        |> join
