@@ -18,6 +18,7 @@ type alias Model =
     { name : String
     , hero : Maybe Hero
     , simulatedStats : Stats
+    , cumulativeStats : CumulativeStats
     , items : List Item
     , addHeroButton : AddHeroButtonState
     , imageURL : String
@@ -29,6 +30,7 @@ initialModel _ =
     ( { name = ""
       , hero = Nothing
       , simulatedStats = initStats
+      , cumulativeStats = initCumulativeStats
       , items = []
       , addHeroButton = HideButtonMenu
       , imageURL = ""
@@ -184,6 +186,26 @@ type alias Item =
     { slot : Slot
     , affixes : List ( Int, Stat )
     }
+
+
+type alias CumulativeStats =
+    { atkFlat : Int
+    , atkPercent : Int
+    , hpFlat : Int
+    , hpPercent : Int
+    , defFlat : Int
+    , defPercent : Int
+    , chc : Int
+    , chd : Int
+    , eff : Int
+    , efr : Int
+    , spd : Int
+    }
+
+
+initCumulativeStats : CumulativeStats
+initCumulativeStats =
+    CumulativeStats 0 100 0 100 0 100 0 0 0 0 0
 
 
 type Slot
