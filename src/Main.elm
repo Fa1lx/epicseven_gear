@@ -273,7 +273,7 @@ formatNameToURL str =
 
 formatNameToFileName : String -> String
 formatNameToFileName str =
-    String.toLower (String.replace " & " "-" (String.replace " " "-" str))
+    String.toLower (String.replace "&" "-" (String.replace " " "-" str))
 
 
 calculateStats : Stats -> List Item -> Stats
