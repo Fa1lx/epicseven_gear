@@ -4978,6 +4978,200 @@ var elm$core$Platform$Sub$none = elm$core$Platform$Sub$batch(_List_Nil);
 var author$project$Main$subscriptions = function (model) {
 	return elm$core$Platform$Sub$none;
 };
+var author$project$Main$accumulateStats = F2(
+	function (aStat, bStat) {
+		return _Utils_update(
+			aStat,
+			{atkFlat: aStat.atkFlat + bStat.atkFlat, atkPercent: aStat.atkPercent + bStat.atkPercent, chc: aStat.chc + bStat.chc, chd: aStat.chd + bStat.chd, defFlat: aStat.defFlat + bStat.defFlat, defPercent: aStat.defPercent + bStat.defPercent, eff: aStat.eff + bStat.eff, efr: aStat.efr + bStat.efr, hpFlat: aStat.hpFlat + bStat.hpFlat, hpPercent: aStat.hpPercent + bStat.hpPercent, spd: aStat.spd + bStat.spd});
+	});
+var author$project$Main$CumulativeStats = function (atkFlat) {
+	return function (atkPercent) {
+		return function (hpFlat) {
+			return function (hpPercent) {
+				return function (defFlat) {
+					return function (defPercent) {
+						return function (chc) {
+							return function (chd) {
+								return function (eff) {
+									return function (efr) {
+										return function (spd) {
+											return {atkFlat: atkFlat, atkPercent: atkPercent, chc: chc, chd: chd, defFlat: defFlat, defPercent: defPercent, eff: eff, efr: efr, hpFlat: hpFlat, hpPercent: hpPercent, spd: spd};
+										};
+									};
+								};
+							};
+						};
+					};
+				};
+			};
+		};
+	};
+};
+var author$project$Main$initCumulativeStats = author$project$Main$CumulativeStats(0)(100)(0)(100)(0)(100)(0)(0)(0)(0)(0);
+var author$project$Main$affixToStats = function (affix) {
+	var cStats = author$project$Main$initCumulativeStats;
+	var _n0 = affix.stat;
+	switch (_n0.$) {
+		case 'Atk':
+			return _Utils_update(
+				cStats,
+				{atkFlat: cStats.atkFlat + affix.value});
+		case 'AtkPercent':
+			return _Utils_update(
+				cStats,
+				{atkPercent: cStats.atkPercent + affix.value});
+		case 'HP':
+			return _Utils_update(
+				cStats,
+				{hpFlat: cStats.hpFlat + affix.value});
+		case 'HPPercent':
+			return _Utils_update(
+				cStats,
+				{hpPercent: cStats.hpPercent + affix.value});
+		case 'Def':
+			return _Utils_update(
+				cStats,
+				{defFlat: cStats.defFlat + affix.value});
+		case 'DefPercent':
+			return _Utils_update(
+				cStats,
+				{defPercent: cStats.defPercent + affix.value});
+		case 'ChC':
+			return _Utils_update(
+				cStats,
+				{chc: cStats.chc + affix.value});
+		case 'ChD':
+			return _Utils_update(
+				cStats,
+				{chd: cStats.chd + affix.value});
+		case 'Eff':
+			return _Utils_update(
+				cStats,
+				{eff: cStats.eff + affix.value});
+		case 'EfR':
+			return _Utils_update(
+				cStats,
+				{efr: cStats.efr + affix.value});
+		default:
+			return _Utils_update(
+				cStats,
+				{spd: cStats.spd + affix.value});
+	}
+};
+var elm$core$Basics$round = _Basics_round;
+var elm$core$List$foldrHelper = F4(
+	function (fn, acc, ctr, ls) {
+		if (!ls.b) {
+			return acc;
+		} else {
+			var a = ls.a;
+			var r1 = ls.b;
+			if (!r1.b) {
+				return A2(fn, a, acc);
+			} else {
+				var b = r1.a;
+				var r2 = r1.b;
+				if (!r2.b) {
+					return A2(
+						fn,
+						a,
+						A2(fn, b, acc));
+				} else {
+					var c = r2.a;
+					var r3 = r2.b;
+					if (!r3.b) {
+						return A2(
+							fn,
+							a,
+							A2(
+								fn,
+								b,
+								A2(fn, c, acc)));
+					} else {
+						var d = r3.a;
+						var r4 = r3.b;
+						var res = (ctr > 500) ? A3(
+							elm$core$List$foldl,
+							fn,
+							acc,
+							elm$core$List$reverse(r4)) : A4(elm$core$List$foldrHelper, fn, acc, ctr + 1, r4);
+						return A2(
+							fn,
+							a,
+							A2(
+								fn,
+								b,
+								A2(
+									fn,
+									c,
+									A2(fn, d, res))));
+					}
+				}
+			}
+		}
+	});
+var elm$core$List$foldr = F3(
+	function (fn, acc, ls) {
+		return A4(elm$core$List$foldrHelper, fn, acc, 0, ls);
+	});
+var elm$core$List$append = F2(
+	function (xs, ys) {
+		if (!ys.b) {
+			return xs;
+		} else {
+			return A3(elm$core$List$foldr, elm$core$List$cons, ys, xs);
+		}
+	});
+var elm$core$List$concat = function (lists) {
+	return A3(elm$core$List$foldr, elm$core$List$append, _List_Nil, lists);
+};
+var elm$core$List$map = F2(
+	function (f, xs) {
+		return A3(
+			elm$core$List$foldr,
+			F2(
+				function (x, acc) {
+					return A2(
+						elm$core$List$cons,
+						f(x),
+						acc);
+				}),
+			_List_Nil,
+			xs);
+	});
+var elm$core$List$concatMap = F2(
+	function (f, list) {
+		return elm$core$List$concat(
+			A2(elm$core$List$map, f, list));
+	});
+var author$project$Main$calculateStats = F2(
+	function (heroStats, items) {
+		var cStats = A3(
+			elm$core$List$foldl,
+			author$project$Main$accumulateStats,
+			author$project$Main$initCumulativeStats,
+			A2(
+				elm$core$List$map,
+				author$project$Main$affixToStats,
+				A2(
+					elm$core$List$concatMap,
+					function (item) {
+						return item.affixes;
+					},
+					items)));
+		return _Utils_update(
+			heroStats,
+			{
+				atk: elm$core$Basics$round(heroStats.atk * (cStats.atkPercent / 100)) + cStats.atkFlat,
+				chc: heroStats.chc + (cStats.chc / 100),
+				chd: heroStats.chd + (cStats.chd / 100),
+				def: elm$core$Basics$round(heroStats.def * (cStats.defPercent / 100)) + cStats.defFlat,
+				eff: heroStats.eff + (cStats.eff / 100),
+				efr: heroStats.efr + (cStats.efr / 100),
+				hp: elm$core$Basics$round(heroStats.hp * (cStats.hpPercent / 100)) + cStats.hpFlat,
+				spd: heroStats.spd + cStats.spd
+			});
+	});
 var elm$core$String$replace = F3(
 	function (before, after, string) {
 		return A2(
@@ -5062,61 +5256,6 @@ var author$project$Main$targetDecoder = A2(
 		}
 	},
 	elm$json$Json$Decode$string);
-var elm$core$List$foldrHelper = F4(
-	function (fn, acc, ctr, ls) {
-		if (!ls.b) {
-			return acc;
-		} else {
-			var a = ls.a;
-			var r1 = ls.b;
-			if (!r1.b) {
-				return A2(fn, a, acc);
-			} else {
-				var b = r1.a;
-				var r2 = r1.b;
-				if (!r2.b) {
-					return A2(
-						fn,
-						a,
-						A2(fn, b, acc));
-				} else {
-					var c = r2.a;
-					var r3 = r2.b;
-					if (!r3.b) {
-						return A2(
-							fn,
-							a,
-							A2(
-								fn,
-								b,
-								A2(fn, c, acc)));
-					} else {
-						var d = r3.a;
-						var r4 = r3.b;
-						var res = (ctr > 500) ? A3(
-							elm$core$List$foldl,
-							fn,
-							acc,
-							elm$core$List$reverse(r4)) : A4(elm$core$List$foldrHelper, fn, acc, ctr + 1, r4);
-						return A2(
-							fn,
-							a,
-							A2(
-								fn,
-								b,
-								A2(
-									fn,
-									c,
-									A2(fn, d, res))));
-					}
-				}
-			}
-		}
-	});
-var elm$core$List$foldr = F3(
-	function (fn, acc, ls) {
-		return A4(elm$core$List$foldrHelper, fn, acc, 0, ls);
-	});
 var elm$json$Json$Decode$field = _Json_decodeField;
 var elm$json$Json$Decode$at = F2(
 	function (fields, decoder) {
@@ -6144,7 +6283,8 @@ var author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{
-								hero: elm$core$Maybe$Just(loadedHero)
+								hero: elm$core$Maybe$Just(loadedHero),
+								simulatedStats: A2(author$project$Main$calculateStats, loadedHero.stats, model.items)
 							}),
 						elm$core$Platform$Cmd$none);
 				} else {
@@ -6312,7 +6452,7 @@ var author$project$Main$showStats = function (stats) {
 										_List_Nil,
 										_List_fromArray(
 											[
-												elm$html$Html$text('Attack')
+												elm$html$Html$text('Hitpoints')
 											])),
 										A2(
 										elm$html$Html$td,
@@ -6320,7 +6460,7 @@ var author$project$Main$showStats = function (stats) {
 										_List_fromArray(
 											[
 												elm$html$Html$text(
-												elm$core$String$fromInt(stats.atk))
+												elm$core$String$fromInt(stats.hp))
 											]))
 									])),
 								A2(
@@ -6333,7 +6473,7 @@ var author$project$Main$showStats = function (stats) {
 										_List_Nil,
 										_List_fromArray(
 											[
-												elm$html$Html$text('Critical Hit Chance')
+												elm$html$Html$text('Attack')
 											])),
 										A2(
 										elm$html$Html$td,
@@ -6341,7 +6481,7 @@ var author$project$Main$showStats = function (stats) {
 										_List_fromArray(
 											[
 												elm$html$Html$text(
-												elm$core$String$fromFloat(stats.chc))
+												elm$core$String$fromInt(stats.atk))
 											]))
 									])),
 								A2(
@@ -6375,6 +6515,69 @@ var author$project$Main$showStats = function (stats) {
 										_List_Nil,
 										_List_fromArray(
 											[
+												elm$html$Html$text('Speed')
+											])),
+										A2(
+										elm$html$Html$td,
+										_List_Nil,
+										_List_fromArray(
+											[
+												elm$html$Html$text(
+												elm$core$String$fromInt(stats.spd))
+											]))
+									])),
+								A2(
+								elm$html$Html$tr,
+								_List_Nil,
+								_List_fromArray(
+									[
+										A2(
+										elm$html$Html$td,
+										_List_Nil,
+										_List_fromArray(
+											[
+												elm$html$Html$text('Critical Hit Chance')
+											])),
+										A2(
+										elm$html$Html$td,
+										_List_Nil,
+										_List_fromArray(
+											[
+												elm$html$Html$text(
+												elm$core$String$fromFloat(stats.chc * 100) + '%')
+											]))
+									])),
+								A2(
+								elm$html$Html$tr,
+								_List_Nil,
+								_List_fromArray(
+									[
+										A2(
+										elm$html$Html$td,
+										_List_Nil,
+										_List_fromArray(
+											[
+												elm$html$Html$text('Critical Hit Damage')
+											])),
+										A2(
+										elm$html$Html$td,
+										_List_Nil,
+										_List_fromArray(
+											[
+												elm$html$Html$text(
+												elm$core$String$fromFloat(stats.chd * 100) + '%')
+											]))
+									])),
+								A2(
+								elm$html$Html$tr,
+								_List_Nil,
+								_List_fromArray(
+									[
+										A2(
+										elm$html$Html$td,
+										_List_Nil,
+										_List_fromArray(
+											[
 												elm$html$Html$text('Effectiveness')
 											])),
 										A2(
@@ -6383,7 +6586,7 @@ var author$project$Main$showStats = function (stats) {
 										_List_fromArray(
 											[
 												elm$html$Html$text(
-												elm$core$String$fromFloat(stats.eff))
+												elm$core$String$fromFloat(stats.eff * 100) + '%')
 											]))
 									])),
 								A2(
@@ -6404,49 +6607,7 @@ var author$project$Main$showStats = function (stats) {
 										_List_fromArray(
 											[
 												elm$html$Html$text(
-												elm$core$String$fromFloat(stats.efr))
-											]))
-									])),
-								A2(
-								elm$html$Html$tr,
-								_List_Nil,
-								_List_fromArray(
-									[
-										A2(
-										elm$html$Html$td,
-										_List_Nil,
-										_List_fromArray(
-											[
-												elm$html$Html$text('Hitpoints')
-											])),
-										A2(
-										elm$html$Html$td,
-										_List_Nil,
-										_List_fromArray(
-											[
-												elm$html$Html$text(
-												elm$core$String$fromInt(stats.hp))
-											]))
-									])),
-								A2(
-								elm$html$Html$tr,
-								_List_Nil,
-								_List_fromArray(
-									[
-										A2(
-										elm$html$Html$td,
-										_List_Nil,
-										_List_fromArray(
-											[
-												elm$html$Html$text('Speed')
-											])),
-										A2(
-										elm$html$Html$td,
-										_List_Nil,
-										_List_fromArray(
-											[
-												elm$html$Html$text(
-												elm$core$String$fromInt(stats.spd))
+												elm$core$String$fromFloat(stats.efr * 100) + '%')
 											]))
 									]))
 							]))
@@ -6756,20 +6917,6 @@ var elm$core$Task$Perform = function (a) {
 	return {$: 'Perform', a: a};
 };
 var elm$core$Task$init = elm$core$Task$succeed(_Utils_Tuple0);
-var elm$core$List$map = F2(
-	function (f, xs) {
-		return A3(
-			elm$core$List$foldr,
-			F2(
-				function (x, acc) {
-					return A2(
-						elm$core$List$cons,
-						f(x),
-						acc);
-				}),
-			_List_Nil,
-			xs);
-	});
 var elm$core$Task$map = F2(
 	function (func, taskA) {
 		return A2(

@@ -6,7 +6,7 @@ import Html.Attributes exposing (class, coords, href, id, name, shape, src, styl
 import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Decode as Decode exposing (Decoder, field, string)
-import List
+import List exposing (..)
 import String
 
 
@@ -18,7 +18,6 @@ type alias Model =
     { name : String
     , hero : Maybe Hero
     , simulatedStats : Stats
-    , cumulativeStats : CumulativeStats
     , items : List Item
     , addHeroButton : AddHeroButtonState
     , imageURL : String
@@ -30,7 +29,6 @@ initialModel _ =
     ( { name = ""
       , hero = Nothing
       , simulatedStats = initStats
-      , cumulativeStats = initCumulativeStats
       , items = []
       , addHeroButton = HideButtonMenu
       , imageURL = ""
@@ -66,7 +64,7 @@ update msg model =
         GotHero result ->
             case result of
                 Ok loadedHero ->
-                    ( { model | hero = Just loadedHero }, Cmd.none )
+                    ( { model | hero = Just loadedHero, simulatedStats = calculateStats loadedHero.stats model.items }, Cmd.none )
 
                 Err _ ->
                     ( model, Cmd.none )
@@ -184,7 +182,13 @@ type alias Modifier =
 
 type alias Item =
     { slot : Slot
-    , affixes : List ( Int, Stat )
+    , affixes : List Affix
+    }
+
+
+type alias Affix =
+    { value : Int
+    , stat : Stat
     }
 
 
@@ -227,7 +231,7 @@ type Stat
     | DefPercent
     | ChC
     | ChD
-    | EfF
+    | Eff
     | EfR
     | Speed
 
@@ -272,6 +276,86 @@ formatNameToFileName str =
     String.toLower (String.replace " & " "-" (String.replace " " "-" str))
 
 
+calculateStats : Stats -> List Item -> Stats
+calculateStats heroStats items =
+    let
+        cStats =
+            foldl
+                accumulateStats
+                --to normalize the % values
+                initCumulativeStats
+                (map affixToStats (concatMap (\item -> item.affixes) items))
+    in
+    { heroStats
+        | atk = round (toFloat heroStats.atk * (toFloat cStats.atkPercent / 100)) + cStats.atkFlat
+        , hp = round (toFloat heroStats.hp * (toFloat cStats.hpPercent / 100)) + cStats.hpFlat
+        , spd = heroStats.spd + cStats.spd
+        , def = round (toFloat heroStats.def * (toFloat cStats.defPercent / 100)) + cStats.defFlat
+        , chc = heroStats.chc + (toFloat cStats.chc / 100)
+        , chd = heroStats.chd + (toFloat cStats.chd / 100)
+        , eff = heroStats.eff + (toFloat cStats.eff / 100)
+        , efr = heroStats.efr + (toFloat cStats.efr / 100)
+    }
+
+
+accumulateStats : CumulativeStats -> CumulativeStats -> CumulativeStats
+accumulateStats aStat bStat =
+    { aStat
+        | atkFlat = aStat.atkFlat + bStat.atkFlat
+        , atkPercent = aStat.atkPercent + bStat.atkPercent
+        , hpFlat = aStat.hpFlat + bStat.hpFlat
+        , hpPercent = aStat.hpPercent + bStat.hpPercent
+        , defFlat = aStat.defFlat + bStat.defFlat
+        , defPercent = aStat.defPercent + bStat.defPercent
+        , chc = aStat.chc + bStat.chc
+        , chd = aStat.chd + bStat.chd
+        , eff = aStat.eff + bStat.eff
+        , efr = aStat.efr + bStat.efr
+        , spd = aStat.spd + bStat.spd
+    }
+
+
+affixToStats : Affix -> CumulativeStats
+affixToStats affix =
+    let
+        cStats =
+            initCumulativeStats
+    in
+    case affix.stat of
+        Atk ->
+            { cStats | atkFlat = cStats.atkFlat + affix.value }
+
+        AtkPercent ->
+            { cStats | atkPercent = cStats.atkPercent + affix.value }
+
+        HP ->
+            { cStats | hpFlat = cStats.hpFlat + affix.value }
+
+        HPPercent ->
+            { cStats | hpPercent = cStats.hpPercent + affix.value }
+
+        Def ->
+            { cStats | defFlat = cStats.defFlat + affix.value }
+
+        DefPercent ->
+            { cStats | defPercent = cStats.defPercent + affix.value }
+
+        ChC ->
+            { cStats | chc = cStats.chc + affix.value }
+
+        ChD ->
+            { cStats | chd = cStats.chd + affix.value }
+
+        Eff ->
+            { cStats | eff = cStats.eff + affix.value }
+
+        EfR ->
+            { cStats | efr = cStats.efr + affix.value }
+
+        Speed ->
+            { cStats | spd = cStats.spd + affix.value }
+
+
 
 -- PHIL FUNs
 
@@ -283,32 +367,36 @@ showStats stats =
         , table [ class "table", class "table is-narrow is-fullwidth" ]
             [ thead []
                 [ tr []
-                    [ Html.td [] [ text "Attack" ]
-                    , Html.td [] [ text (String.fromInt stats.atk) ]
+                    [ Html.td [] [ text "Hitpoints" ]
+                    , Html.td [] [ text (String.fromInt stats.hp) ]
                     ]
                 , tr []
-                    [ Html.td [] [ text "Critical Hit Chance" ]
-                    , Html.td [] [ text (String.fromFloat stats.chc) ]
+                    [ Html.td [] [ text "Attack" ]
+                    , Html.td [] [ text (String.fromInt stats.atk) ]
                     ]
                 , tr []
                     [ Html.td [] [ text "Defense" ]
                     , Html.td [] [ text (String.fromInt stats.def) ]
                     ]
                 , tr []
+                    [ Html.td [] [ text "Speed" ]
+                    , Html.td [] [ text (String.fromInt stats.spd) ]
+                    ]
+                , tr []
+                    [ Html.td [] [ text "Critical Hit Chance" ]
+                    , Html.td [] [ text (String.fromFloat (stats.chc * 100) ++ "%") ]
+                    ]
+                , tr []
+                    [ Html.td [] [ text "Critical Hit Damage" ]
+                    , Html.td [] [ text (String.fromFloat (stats.chd * 100) ++ "%") ]
+                    ]
+                , tr []
                     [ Html.td [] [ text "Effectiveness" ]
-                    , Html.td [] [ text (String.fromFloat stats.eff) ]
+                    , Html.td [] [ text (String.fromFloat (stats.eff * 100) ++ "%") ]
                     ]
                 , tr []
                     [ Html.td [] [ text "Effect Resistance" ]
-                    , Html.td [] [ text (String.fromFloat stats.efr) ]
-                    ]
-                , tr []
-                    [ Html.td [] [ text "Hitpoints" ]
-                    , Html.td [] [ text (String.fromInt stats.hp) ]
-                    ]
-                , tr []
-                    [ Html.td [] [ text "Speed" ]
-                    , Html.td [] [ text (String.fromInt stats.spd) ]
+                    , Html.td [] [ text (String.fromFloat (stats.efr * 100) ++ "%") ]
                     ]
                 ]
             ]
@@ -662,3 +750,18 @@ sectionDecoder =
                     _ ->
                         Decode.succeed Multiplicative
             )
+
+
+
+-- Helper functions
+
+
+join : List (List a) -> List a
+join =
+    List.foldr (++) []
+
+
+flatMap : (a -> List b) -> List a -> List b
+flatMap f list =
+    List.map f list
+        |> join
