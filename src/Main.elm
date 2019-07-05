@@ -171,15 +171,6 @@ type alias Skill =
 -- Basic template for each possible modifier for a hero's skill
 
 
-type alias Modifier =
-    { category : Maybe Stat -- defines which stat this modifier scales of
-    , target : Maybe Origin
-    , section : Maybe Section -- defines if the modifier is additive or multiplicative
-    , value : Float -- defines the magnitude of the modifier
-    , soulburn : Float -- defines the magnitude of the modifier while soulburned(same as value if not soulburnable)
-    }
-
-
 type alias Item =
     { slot : Slot
     , affixes : List Affix
@@ -243,12 +234,22 @@ type Stat
 type alias Enemy =
     { name : String
     , element : String
+    , hpValue : Int
     , defValue : Int
     }
 
 
 
 --TODO: create record for Wyvern11, Golem11, Banshee11, A11
+
+
+type alias Modifier =
+    { category : Maybe Stat -- defines which stat this modifier scales of
+    , target : Maybe Origin
+    , section : Section -- defines if the modifier is additive or multiplicative
+    , value : Float -- defines the magnitude of the modifier
+    , soulburn : Float -- defines the magnitude of the modifier while soulburned(same as value if not soulburnable)
+    }
 
 
 type Section
@@ -260,6 +261,22 @@ type Section
 type Origin
     = Self
     | Target
+
+
+type alias SkillModifier =
+    { defaultMulti : Float
+    , pow : Float
+    , ownAtk : Float
+    , ownHP : Float
+    , ownDef : Float
+    , ownSpeed : Float
+    , enemyHP : Float
+    }
+
+
+initSkillMod : SkillModifier
+initSkillMod =
+    SkillModifier 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 
 
 
@@ -356,7 +373,49 @@ affixToStats affix =
             { cStats | spd = cStats.spd + affix.value }
 
 
+updateSkillMod : Modifier -> SkillModifier -> SkillModifier
+updateSkillMod modifier skillMod =
+    case modifier.section of
+        Pow ->
+            { skillMod | pow = modifier.value }
 
+        Additive ->
+            case modifier.target of
+                --only HP has a target scaling, I think
+                Just Target ->
+                    { skillMod | enemyHP = modifier.value }
+
+                _ ->
+                    case modifier.category of
+                        Just stat ->
+                            case stat of
+                                Atk ->
+                                    { skillMod | ownAtk = modifier.value }
+
+                                HP ->
+                                    { skillMod | ownHP = modifier.value }
+
+                                _ ->
+                                    { skillMod | ownDef = modifier.value }
+
+                        _ ->
+                            initSkillMod
+
+        --only own speed scaling is multiplicative
+        Multiplicative ->
+            { skillMod | ownSpeed = modifier.value }
+
+
+convertSkillToSkillMod : Skill -> SkillModifier
+convertSkillToSkillMod skill =
+    foldl updateSkillMod initSkillMod skill.modifiers
+
+
+
+--TODO:
+--add element logic
+--figure out clean way to calc all needed mdg numbers
+--calc them lol
 -- PHIL FUNs
 
 
@@ -696,7 +755,7 @@ modifierDecoder =
         Modifier
         (Decode.maybe (Decode.at [ "stat" ] categoryDecoder))
         (Decode.maybe (Decode.at [ "target" ] targetDecoder))
-        (Decode.maybe (Decode.at [ "section" ] sectionDecoder))
+        (Decode.at [ "section" ] sectionDecoder)
         (Decode.at [ "value" ] Decode.float)
         (Decode.at [ "soulburn" ] Decode.float)
 
