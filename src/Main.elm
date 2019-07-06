@@ -1,8 +1,8 @@
 module Main exposing (main)
 
 import Browser
-import Html exposing (Attribute, Html, a, button, div, footer, h1, h2, header, i, img, node, p, section, span, table, text, th, thead, tr)
-import Html.Attributes exposing (class, coords, href, id, name, shape, src, style, usemap)
+import Html exposing (Attribute, Html, a, button, div, fieldset, footer, h1, h2, header, i, img, input, label, node, p, section, span, table, text, th, thead, tr)
+import Html.Attributes exposing (class, coords, href, id, name, shape, src, style, type_, usemap, value)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Decode as Decode exposing (Decoder, field, string)
@@ -21,6 +21,7 @@ type alias Model =
     , items : List Item
     , addHeroButton : AddHeroButtonState
     , imageURL : String
+    , modal : Maybe ModalState
     }
 
 
@@ -32,6 +33,7 @@ initialModel _ =
       , items = []
       , addHeroButton = HideButtonMenu
       , imageURL = ""
+      , modal = Nothing
       }
     , Cmd.none
     )
@@ -47,6 +49,7 @@ type Msg
     | AddHeroButton AddHeroButtonMsg
     | CloseModal
     | HeroClicked String AddHeroButtonMsg
+    | OpenModal ModalMsg Item
 
 
 
@@ -69,9 +72,8 @@ update msg model =
                 Err _ ->
                     ( model, Cmd.none )
 
-        CloseModal ->
-            ( model, Cmd.none )
-
+        --CloseModal ->
+        --    ( model, Cmd.none )
         AddHeroButton addHeroButtonMsg ->
             ( updateAddHeroButton addHeroButtonMsg model, Cmd.none )
 
@@ -81,6 +83,12 @@ update msg model =
                     updateAddHeroButton addHeroButtonMsg model
             in
             ( { oldModel | name = name }, heroLoader (formatNameToURL name) )
+
+        OpenModal modalMsg item ->
+            ( updateModal modalMsg item model, Cmd.none )
+
+        CloseModal ->
+            ( { model | modal = Nothing }, Cmd.none )
 
 
 
@@ -93,6 +101,7 @@ view model =
         [ viewHeroButton model
         , applicationHeader
         , image model.name model.simulatedStats
+        , viewModal model
         ]
 
 
@@ -197,6 +206,9 @@ type alias CumulativeStats =
     , spd : Int
     }
 
+initItem: Slot -> Item
+initItem slot = 
+    Item slot []
 
 initCumulativeStats : CumulativeStats
 initCumulativeStats =
@@ -462,6 +474,45 @@ showStats stats =
         ]
 
 
+showSkill : SkillModifier -> Html Msg
+showSkill stats =
+    div [ class "box statsbox" ]
+        [ p [ class "title is-5" ] [ text "Stats" ]
+        , table [ class "table", class "table is-narrow is-fullwidth" ]
+            [ thead []
+                [ tr []
+                    [ Html.td [] [ text "dafaultMulti" ]
+                    , Html.td [] [ text (String.fromFloat stats.defaultMulti) ]
+                    ]
+                , tr []
+                    [ Html.td [] [ text "enemyHP" ]
+                    , Html.td [] [ text (String.fromFloat stats.enemyHP) ]
+                    ]
+                , tr []
+                    [ Html.td [] [ text "ownAtk" ]
+                    , Html.td [] [ text (String.fromFloat stats.ownAtk) ]
+                    ]
+                , tr []
+                    [ Html.td [] [ text "ownDef" ]
+                    , Html.td [] [ text (String.fromFloat stats.ownDef) ]
+                    ]
+                , tr []
+                    [ Html.td [] [ text "ownHP" ]
+                    , Html.td [] [ text (String.fromFloat stats.ownHP) ]
+                    ]
+                , tr []
+                    [ Html.td [] [ text "ownSpeed" ]
+                    , Html.td [] [ text (String.fromFloat stats.ownSpeed) ]
+                    ]
+                , tr []
+                    [ Html.td [] [ text "pow" ]
+                    , Html.td [] [ text (String.fromFloat stats.pow) ]
+                    ]
+                ]
+            ]
+        ]
+
+
 imgMap : List (Attribute msg) -> List (Html msg) -> Html msg
 imgMap attributes children =
     node "map" attributes children
@@ -557,7 +608,7 @@ image name stats =
                 [ src imageurl, class "test2" ]
                 []
             , div [ class "itemimg" ]
-                [ img [ onClick (HeroClicked "" HideAddHeroDropdownMenu), src imageurl ] []
+                [ img [ onClick (OpenModal OpenInput (initItem Weapon)), src imageurl ] []
                 , imgMap [ Html.Attributes.name "my_map" ] [ area [ shape "Rectangle", coords "0,0,100,100" ] [] ]
                 ]
             , if name /= "" then
@@ -565,6 +616,11 @@ image name stats =
 
               else
                 div [] []
+
+            --, if name /= "" then
+            -- showSkill skill
+            --  else
+            --  div [] []
             ]
         ]
 
@@ -640,6 +696,127 @@ heroDropDownElement name =
 onClickNoBubblingUp : msg -> Attribute msg
 onClickNoBubblingUp msg =
     Html.Events.stopPropagationOn "click" (Decode.map (\m -> ( m, True )) (Decode.succeed msg))
+
+
+type ModalMsg
+    = OpenInput
+
+
+type ModalState
+    = InputItem Item
+
+
+updateModal : ModalMsg -> Item -> Model -> Model
+updateModal modalMsg item model =
+    case modalMsg of
+        OpenInput ->
+            { model | modal = Just (InputItem item) }
+
+
+inputItem : Item -> Html Msg
+inputItem item =
+-- case item of 
+    div []
+        [ modalHeader ""--s
+        , section [ class "modal-card-body modal1" ]
+            [ fieldset []
+                [ div [ class "field" ]
+                    [ label [ class "label" ] [ text "Atk" ]
+                    , div [ class "control" ]
+                        [ input [ class "input", type_ "text" ] []
+                        ]
+                    ]
+                , div [ class "field" ]
+                    [ label [ class "label" ] [ text "AtkPercent" ]
+                    , div [ class "control" ]
+                        [ input [ class "input", type_ "text" ] []
+                        ]
+                    ]
+                , div [ class "field" ]
+                    [ label [ class "label" ] [ text "HP" ]
+                    , div [ class "control" ]
+                        [ input [ class "input", type_ "text" ] []
+                        ]
+                    ]
+                , div [ class "field" ]
+                    [ label [ class "label" ] [ text "HPPercent" ]
+                    , div [ class "control" ]
+                        [ input [ class "input", type_ "text" ] []
+                        ]
+                    ]
+                , div [ class "field" ]
+                    [ label [ class "label" ] [ text "Def" ]
+                    , div [ class "control" ]
+                        [ input [ class "input", type_ "text" ] []
+                        ]
+                    ]
+                , div [ class "field" ]
+                    [ label [ class "label" ] [ text "DefPercent" ]
+                    , div [ class "control" ]
+                        [ input [ class "input", type_ "text" ] []
+                        ]
+                    ]
+                , div [ class "field" ]
+                    [ label [ class "label" ] [ text "Chc" ]
+                    , div [ class "control" ]
+                        [ input [ class "input", type_ "text" ] []
+                        ]
+                    ]
+                , div [ class "field" ]
+                    [ label [ class "label" ] [ text "Chd" ]
+                    , div [ class "control" ]
+                        [ input [ class "input", type_ "text" ] []
+                        ]
+                    ]
+                , div [ class "field" ]
+                    [ label [ class "label" ] [ text "Eff" ]
+                    , div [ class "control" ]
+                        [ input [ class "input", type_ "text" ] []
+                        ]
+                    ]
+                , div [ class "field" ]
+                    [ label [ class "label" ] [ text "EfR" ]
+                    , div [ class "control" ]
+                        [ input [ class "input", type_ "text" ] []
+                        ]
+                    ]
+                , div [ class "field" ]
+                    [ label [ class "label" ] [ text "Speed" ]
+                    , div [ class "control" ]
+                        [ input [ class "input", type_ "text" ] []
+                        ]
+                    ]
+                ]
+            ]
+        ]
+
+
+inputItemInModal : Item -> Html Msg
+inputItemInModal item =
+    div []
+        [ inputItem item
+        , modalFooter
+            [ a [ class "button is-success", onClick CloseModal ] [ text "Form hinzufügen" ] ]
+        ]
+
+
+viewModal : Model -> Html Msg
+viewModal model =
+    case model.modal of
+        Nothing ->
+            span [] []
+
+        Just modalState ->
+            div [ class "modal is-active" ]
+                [ div [ class "modal-background" ] []
+                , div [ class "modal-card" ]
+                    [ case modalState of
+                        InputItem item ->
+                            inputItemInModal item
+
+                    --inputItemInModal string
+                    ]
+                ]
 
 
 machwas : Html Msg
