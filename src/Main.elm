@@ -7,6 +7,7 @@ import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Decode as Decode exposing (Decoder, field, string)
 import List exposing (..)
+import List.Extra
 import String
 
 
@@ -423,11 +424,48 @@ convertSkillToSkillMod skill =
     foldl updateSkillMod initSkillMod skill.modifiers
 
 
+calculateDmgOfSkill : Stats -> SkillModifier -> Int
+calculateDmgOfSkill heroStats skillMod =
+    floor
+        ((toFloat heroStats.atk * skillMod.ownAtk + toFloat heroStats.hp * skillMod.ownHP + toFloat heroStats.def * skillMod.ownDef)
+            * skillMod.pow
+            * skillMod.defaultMulti
+            * (1.0 + toFloat heroStats.spd * skillMod.ownSpeed)
+            * (1.0 + (heroStats.chc / 100.0 * (heroStats.chd - 100.0)))
+        )
 
---TODO:
---add element logic
---figure out clean way to calc all needed mdg numbers
---calc them lol
+
+calcSkill1 : Hero -> Stats -> Int
+calcSkill1 hero stats =
+    case List.Extra.getAt 0 hero.skills of
+        Nothing ->
+            0
+
+        Just skill1 ->
+            calculateDmgOfSkill stats (convertSkillToSkillMod skill1)
+
+
+calcSkill2 : Hero -> Stats -> Int
+calcSkill2 hero stats =
+    case List.Extra.getAt 1 hero.skills of
+        Nothing ->
+            0
+
+        Just skill2 ->
+            calculateDmgOfSkill stats (convertSkillToSkillMod skill2)
+
+
+calcSkill3 : Hero -> Stats -> Int
+calcSkill3 hero stats =
+    case List.Extra.getAt 2 hero.skills of
+        Nothing ->
+            0
+
+        Just skill3 ->
+            calculateDmgOfSkill stats (convertSkillToSkillMod skill3)
+
+
+
 -- PHIL FUNs
 
 
