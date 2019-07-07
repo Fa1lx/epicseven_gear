@@ -574,7 +574,7 @@ updateAddHeroButton addHeroButtonMsg model =
 
 applicationTitle : String.String
 applicationTitle =
-    "Epic7Seven Gear Calculator123"
+    "Epic7Seven Gear Calculator"
 
 
 applicationSubTitle : String.String
@@ -587,7 +587,7 @@ applicationHeader =
     div [ class "hero" ]
         [ div [ class "hero-body" ]
             [ div [ class "container" ]
-                [ h1 [ class "title" ] [ text applicationTitle ]
+                [ h1 [ class "title has-text-white" ] [ text applicationTitle ]
                 , h2 [ class "subtitle" ] [ text applicationSubTitle ]
                 ]
             ]
@@ -650,7 +650,7 @@ image name stats inventory =
             ]
         , div [ class "space" ] []
         ]
-    else div[][]
+    else div[][img [src "https://static.smilegatemegaport.com/event/live/epic7/world/brand/images/common/img_share_630.jpg", class "openimage"][]]
 
 
 viewHeroButton : Model -> Html Msg
@@ -679,7 +679,7 @@ viewHeroButton model =
             ]
             [ div [ class "dropdown-trigger" ]
                 [ button
-                    [ class "button  is-info is-large is-rounded"
+                    [ class "button  is-black is-large is-rounded"
                     , ariaHaspopup "true"
                     , ariaControls "dropdown-menu3"
                     ]
