@@ -1,5 +1,6 @@
 module Main exposing (main)
 
+import Bool.Extra
 import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -178,6 +179,10 @@ type alias Skill =
     }
 
 
+dummySkill =
+    Skill True 0 (Just "") 0 "Dummy SKill" (Just "") [ dummyMod ]
+
+
 
 -- Basic template for each possible modifier for a hero's skill
 
@@ -196,6 +201,11 @@ type alias Item =
     , efr : Int
     , spd : Int
     }
+
+
+initItem : Slot -> Item
+initItem slot =
+    Item slot 0 0 0 0 0 0 0 0 0 0 0
 
 
 initCumulativeStats : Item
@@ -234,6 +244,10 @@ type alias Modifier =
     , value : Float -- defines the magnitude of the modifier
     , soulburn : Float -- defines the magnitude of the modifier while soulburned(same as value if not soulburnable)
     }
+
+
+dummyMod =
+    Modifier Nothing Nothing Pow 0.0 0.0
 
 
 type Section
@@ -465,31 +479,35 @@ createSkillEntity : Hero -> Stats -> Int -> Html Msg
 createSkillEntity hero stats skillId =
     let
         skill =
-            List.Extra.getAt skillId hero.skills
+            case List.Extra.getAt skillId hero.skills of
+                Just a ->
+                    a
+
+                Nothing ->
+                    dummySkill
     in
-    tr []
+    td []
         [ td []
-            [ [ tr []
-                    [ td [] [ text "Skill Name:" ]
-                    , td [] [ text skill.name ]
-                    ]
-              , tr []
-                    [ td [] [ text "Cooldown:" ]
-                    , td [] [ text skill.cooldown ]
-                    ]
-              , tr []
-                    [ td [] [ text "isPassive:" ]
-                    , td [] [ text skill.isPassive ]
-                    ]
-              , tr []
-                    [ td [] [ text "Damage:" ]
-                    , td [] [ text (calculateDmgOfSkill stats skillId) ]
-                    ]
-              , tr []
-                    [ td [] [ text "Description:" ]
-                    , td [] [ text skill.description ]
-                    ]
-              ]
+            [ tr []
+                [ td [] [ text "Skill Name:" ]
+                , td [] [ text skill.name ]
+                ]
+            , tr []
+                [ td [] [ text "Cooldown:" ]
+                , td [] [ text (String.fromInt skill.cooldown) ]
+                ]
+            , tr []
+                [ td [] [ text "isPassive:" ]
+                , td [] [ text (Bool.Extra.toString skill.isPassive) ]
+                ]
+            , tr []
+                [ td [] [ text "Damage:" ]
+                , td [] [ text (String.fromInt (calculateDmgOfSkill stats (convertSkillToSkillMod skill))) ]
+                ]
+            , tr []
+                [ td [] [ text "Description:" ]
+                , td [] [ text (Maybe.withDefault "" skill.description) ]
+                ]
             ]
         , td [] [ showSkill (convertSkillToSkillMod skill) ]
         ]
@@ -682,6 +700,7 @@ onClickNoBubblingUp msg =
 
 type ModalMsg
     = OpenInput
+    | Change
 
 
 type ModalState
@@ -694,78 +713,112 @@ updateModal modalMsg item model =
         OpenInput ->
             { model | modal = Just (InputItem item) }
 
+        Change ->
+            { model | modal = Just (InputItem item) }
+
 
 inputItem : Item -> Html Msg
 inputItem item =
-    -- case item of
+    let
+        changeItemAtk newAtk =
+            OpenModal Change (Item item.slot (Maybe.withDefault 0 (String.toInt newAtk)) item.atkPercent item.hpFlat item.hpPercent item.defFlat item.defPercent item.chc item.chd item.eff item.efr item.spd)
+
+        changeItemAtkP newAtkP =
+            OpenModal Change (Item item.slot item.atkFlat (Maybe.withDefault 0 (String.toInt newAtkP)) item.hpFlat item.hpPercent item.defFlat item.defPercent item.chc item.chd item.eff item.efr item.spd)
+
+        changeItemDef newDef =
+            OpenModal Change (Item item.slot item.atkFlat item.atkPercent item.hpFlat item.hpPercent (Maybe.withDefault 0 (String.toInt newDef)) item.defPercent item.chc item.chd item.eff item.efr item.spd)
+
+        changeItemDefP newDefP =
+            OpenModal Change (Item item.slot item.atkFlat item.atkPercent item.hpFlat item.hpPercent item.defFlat (Maybe.withDefault 0 (String.toInt newDefP)) item.chc item.chd item.eff item.efr item.spd)
+
+        changeItemHP newHP =
+            OpenModal Change (Item item.slot item.atkFlat item.atkPercent (Maybe.withDefault 0 (String.toInt newHP)) item.hpPercent item.defFlat item.defPercent item.chc item.chd item.eff item.efr item.spd)
+
+        changeItemHPP newHPP =
+            OpenModal Change (Item item.slot item.atkFlat item.atkPercent item.hpFlat (Maybe.withDefault 0 (String.toInt newHPP)) item.defFlat item.defPercent item.chc item.chd item.eff item.efr item.spd)
+
+        changeItemChc newChc =
+            OpenModal Change (Item item.slot item.atkFlat item.atkPercent item.hpFlat item.hpPercent item.defFlat item.defPercent (Maybe.withDefault 0 (String.toInt newChc)) item.chd item.eff item.efr item.spd)
+
+        changeItemChd newChd =
+            OpenModal Change (Item item.slot item.atkFlat item.atkPercent item.hpFlat item.hpPercent item.defFlat item.defPercent item.chc (Maybe.withDefault 0 (String.toInt newChd)) item.eff item.efr item.spd)
+
+        changeItemEff newEff =
+            OpenModal Change (Item item.slot item.atkFlat item.atkPercent item.hpFlat item.hpPercent item.defFlat item.defPercent item.chc item.chd (Maybe.withDefault 0 (String.toInt newEff)) item.efr item.spd)
+
+        changeItemEfR newEfR =
+            OpenModal Change (Item item.slot item.atkFlat item.atkPercent item.hpFlat item.hpPercent item.defFlat item.defPercent item.chc item.chd item.eff (Maybe.withDefault 0 (String.toInt newEfR)) item.spd)
+
+        changeItemSpd newSpd =
+            OpenModal Change (Item item.slot item.atkFlat item.atkPercent item.hpFlat item.hpPercent item.defFlat item.defPercent item.chc item.chd item.eff item.efr (Maybe.withDefault 0 (String.toInt newSpd)))
+    in
     div []
         [ modalHeader "" --s
         , section [ class "modal-card-body modal1" ]
             [ fieldset []
-                [ div [ class "field" ]
-                    [ label [ class "label" ] [ text "Atk" ]
-                    , div [ class "control" ]
-                        [ input [ class "input", type_ "text" ] []
-                        ]
+                [ div []
+                    [ text "Atk"
+                    , input [ class "input", type_ "text", value (String.fromInt item.atkFlat), onInput changeItemAtk ] []
                     ]
                 , div [ class "field" ]
                     [ label [ class "label" ] [ text "AtkPercent" ]
                     , div [ class "control" ]
-                        [ input [ class "input", type_ "text" ] []
+                        [ input [ class "input", type_ "text", value (String.fromInt item.atkPercent), onInput changeItemAtkP ] []
                         ]
                     ]
                 , div [ class "field" ]
                     [ label [ class "label" ] [ text "HP" ]
                     , div [ class "control" ]
-                        [ input [ class "input", type_ "text" ] []
+                        [ input [ class "input", type_ "text", value (String.fromInt item.hpFlat), onInput changeItemHP ] []
                         ]
                     ]
                 , div [ class "field" ]
                     [ label [ class "label" ] [ text "HPPercent" ]
                     , div [ class "control" ]
-                        [ input [ class "input", type_ "text" ] []
+                        [ input [ class "input", type_ "text", value (String.fromInt item.hpPercent), onInput changeItemHPP ] []
                         ]
                     ]
                 , div [ class "field" ]
                     [ label [ class "label" ] [ text "Def" ]
                     , div [ class "control" ]
-                        [ input [ class "input", type_ "text" ] []
+                        [ input [ class "input", type_ "text", value (String.fromInt item.defFlat), onInput changeItemDef ] []
                         ]
                     ]
                 , div [ class "field" ]
                     [ label [ class "label" ] [ text "DefPercent" ]
                     , div [ class "control" ]
-                        [ input [ class "input", type_ "text" ] []
+                        [ input [ class "input", type_ "text", value (String.fromInt item.defPercent), onInput changeItemDefP ] []
                         ]
                     ]
                 , div [ class "field" ]
                     [ label [ class "label" ] [ text "Chc" ]
                     , div [ class "control" ]
-                        [ input [ class "input", type_ "text" ] []
+                        [ input [ class "input", type_ "text", value (String.fromInt item.chc), onInput changeItemChc ] []
                         ]
                     ]
                 , div [ class "field" ]
                     [ label [ class "label" ] [ text "Chd" ]
                     , div [ class "control" ]
-                        [ input [ class "input", type_ "text" ] []
+                        [ input [ class "input", type_ "text", value (String.fromInt item.chd), onInput changeItemChd ] []
                         ]
                     ]
                 , div [ class "field" ]
                     [ label [ class "label" ] [ text "Eff" ]
                     , div [ class "control" ]
-                        [ input [ class "input", type_ "text" ] []
+                        [ input [ class "input", type_ "text", value (String.fromInt item.eff), onInput changeItemEff ] []
                         ]
                     ]
                 , div [ class "field" ]
                     [ label [ class "label" ] [ text "EfR" ]
                     , div [ class "control" ]
-                        [ input [ class "input", type_ "text" ] []
+                        [ input [ class "input", type_ "text", value (String.fromInt item.efr), onInput changeItemEfR ] []
                         ]
                     ]
                 , div [ class "field" ]
                     [ label [ class "label" ] [ text "Speed" ]
                     , div [ class "control" ]
-                        [ input [ class "input", type_ "text" ] []
+                        [ input [ class "input", type_ "text", value (String.fromInt item.spd), onInput changeItemSpd ] []
                         ]
                     ]
                 ]
