@@ -21,6 +21,7 @@ type alias Model =
     { name : String
     , hero : Maybe Hero
     , simulatedStats : Stats
+    , baseStats : Stats
     , items : List Item
     , addHeroButton : AddHeroButtonState
     , imageURL : String
@@ -35,6 +36,7 @@ initialModel _ =
     ( { name = ""
       , hero = Nothing
       , simulatedStats = initStats
+      , baseStats = initStats
       , items = []
       , addHeroButton = HideButtonMenu
       , imageURL = ""
@@ -58,12 +60,7 @@ type Msg
     | HeroClicked String AddHeroButtonMsg
     | OpenModal ModalMsg Item
     | Add
-
-
-
---| Failure
---| Success
---| UpdateItem
+    | UpdateStats
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -75,13 +72,11 @@ update msg model =
         GotHero result ->
             case result of
                 Ok loadedHero ->
-                    ( { model | hero = Just loadedHero, simulatedStats = calculateStats loadedHero.stats model.items }, Cmd.none )
+                    ( { model | hero = Just loadedHero, simulatedStats = calculateStats loadedHero.stats model.items, baseStats = loadedHero.stats }, Cmd.none )
 
                 Err _ ->
                     ( model, Cmd.none )
 
-        --CloseModal ->
-        --    ( model, Cmd.none )
         AddHeroButton addHeroButtonMsg ->
             ( updateAddHeroButton addHeroButtonMsg model, Cmd.none )
 
@@ -96,10 +91,22 @@ update msg model =
             ( updateModal modalMsg item model, Cmd.none )
 
         Add ->
-            ({ model | modal = Nothing}, Cmd.none)--, items = "Fun" :: model.items}
+            ( { model
+                | modal = Nothing
+                , items =
+                    [ model.newItem ] ++ List.filter (\x -> x.slot /= model.currentItem.slot) model.items
+                , newItem = initItem Weapon
+                , currentItem = initItem Weapon
+              }
+            , Cmd.none
+            )
 
+        --, items = "Fun" :: model.items}
         CloseModal ->
             ( { model | modal = Nothing }, Cmd.none )
+
+        UpdateStats ->
+            ( { model | simulatedStats = calculateStats model.baseStats model.items }, Cmd.none )
 
 
 
@@ -303,11 +310,13 @@ calculateStats : Stats -> List Item -> Stats
 calculateStats heroStats items =
     let
         cStats =
-            List.foldl
-                accumulateStats
-                --to normalize the % values
-                initCumulativeStats
-                items
+            List.foldl accumulateStats initCumulativeStats items
+
+        --List.map accumulateStats
+        --to normalize the % values
+        --  ([ initCumulativeStats ]
+        --    ++ items
+        --)
     in
     { heroStats
         | atk = round (toFloat heroStats.atk * (toFloat cStats.atkPercent / 100)) + cStats.atkFlat
@@ -395,6 +404,28 @@ calcSkill hero skillId stats =
 
         Just skill ->
             calculateDmgOfSkill stats (convertSkillToSkillMod skill)
+
+
+getItemFromInventory : Slot -> List Item -> Item
+getItemFromInventory slot_ inventory =
+    let
+        item =
+            List.head (List.filter (\item_ -> item_.slot == slot_) inventory)
+    in
+    case item of
+        Just a ->
+            a
+
+        Nothing ->
+            initItem slot_
+
+
+updateInventory : Model -> Model
+updateInventory model =
+    { model
+        | items =
+            [ model.newItem ] ++ List.filter (\x -> x.slot /= model.currentItem.slot) model.items
+    }
 
 
 
@@ -521,16 +552,6 @@ createSkillEntity hero stats skillId =
         ]
 
 
-imgMap : List (Attribute msg) -> List (Html msg) -> Html msg
-imgMap attributes children =
-    node "map" attributes children
-
-
-area : List (Attribute msg) -> List (Html msg) -> Html msg
-area attributes children =
-    node "area" attributes children
-
-
 type AddHeroButtonMsg
     = HideAddHeroDropdownMenu
     | ShowAddHeroDropdownMenu
@@ -572,19 +593,6 @@ applicationHeader =
             ]
         ]
 
-getItemFromInventory : Slot -> List Item -> Item
-getItemFromInventory slot_ inventory =
-    let
-        item =
-            List.head (List.filter (\item_ -> item_.slot == slot_) inventory)
-    in
-    case item of
-        Just a ->
-            a
-
-        Nothing ->
-            initItem slot_
-
 
 image : String -> Stats -> List Item -> Html Msg
 image name stats inventory =
@@ -623,29 +631,38 @@ image name stats inventory =
             else
                 ""
     in
-     div [ class "flexbox" ]
-            [ 
-             div [class "space"][]
-            ,if name /= "" then
-                showStats stats
-            else
-                div [] []
-            , div [class "space"][]
-            , div [class "itemimg"][ img [ onClick (OpenModal OpenInput (getItemFromInventory Weapon inventory)), src imageurl ,class "rounded"] [],img [ onClick (OpenModal OpenInput (getItemFromInventory Weapon inventory)), src imageurl,class "rounded" ] [],img [ onClick (OpenModal OpenInput (getItemFromInventory Weapon inventory)), src imageurl,class "rounded"] []]
-            ,if imageurl /= "" then img
+    div [ class "flexbox" ]
+        [ div [ class "space" ] []
+        , if name /= "" then
+            showStats stats
+
+          else
+            div [] []
+        , div [ class "space" ] []
+        , div [ class "itemimg" ]
+            [ img [ onClick (OpenModal OpenInput (getItemFromInventory Weapon inventory)), src imageurl, class "rounded" ] []
+            , img [ onClick (OpenModal OpenInput (getItemFromInventory Helmet inventory)), src imageurl, class "rounded" ] []
+            , img [ onClick (OpenModal OpenInput (getItemFromInventory Armor inventory)), src imageurl, class "rounded" ] []
+            ]
+        , if imageurl /= "" then
+            img
                 [ src imageurl, class "heroimg" ]
                 []
-                else div [][]
-            , div [ class "flexauto itemimg" ][ img [ onClick (OpenModal OpenInput (getItemFromInventory Weapon inventory)), src imageurl ,class "rounded"] [],img [ onClick (OpenModal OpenInput (getItemFromInventory Weapon inventory)), src imageurl ,class "rounded"] [],img [ onClick (OpenModal OpenInput (getItemFromInventory Weapon inventory)), src imageurl,class "rounded" ] []]
-            , div [class "space"][]
-            
 
-            --, if name /= "" then
-            -- showSkill skill
-            --  else
-            --  div [] []
+          else
+            div [] []
+        , div [ class "flexauto itemimg" ]
+            [ img [ onClick (OpenModal OpenInput (getItemFromInventory Necklace inventory)), src imageurl, class "rounded" ] []
+            , img [ onClick (OpenModal OpenInput (getItemFromInventory Ring inventory)), src imageurl, class "rounded" ] []
+            , img [ onClick (OpenModal OpenInput (getItemFromInventory Boots inventory)), src imageurl, class "rounded" ] []
             ]
-        
+        , div [ class "space" ] []
+
+        --, if name /= "" then
+        -- showSkill skill
+        --  else
+        --  div [] []
+        ]
 
 
 viewHeroButton : Model -> Html Msg
@@ -850,11 +867,6 @@ inputItem item =
         ]
 
 
-inputItemInModal : Item -> Html Msg
-inputItemInModal item =
-    inputItem item
-
-
 
 --, modalFooter
 --    [ a [ class "button is-success", onClick CloseModal ] [ text "Form hinzufügen" ] ]
@@ -888,7 +900,7 @@ modalHeader title =
 modalFooter : Html Msg
 modalFooter =
     footer [ class "modal-card-foot" ]
-        ([ a [ class "button is-success", onClick Add] [ text "Add Item" ] ]
+        ([ a [ class "button is-success", onClick Add ] [ text "Add Item" ] ]
             ++ [ button [ class "button is-success", onClick CloseModal ] [ text "Close" ]
                ]
         )
