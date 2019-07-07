@@ -4486,6 +4486,35 @@ function _Browser_load(url)
 	}));
 }
 var author$project$Main$HideButtonMenu = {$: 'HideButtonMenu'};
+var author$project$Main$Weapon = {$: 'Weapon'};
+var author$project$Main$Item = function (slot) {
+	return function (atkFlat) {
+		return function (atkPercent) {
+			return function (hpFlat) {
+				return function (hpPercent) {
+					return function (defFlat) {
+						return function (defPercent) {
+							return function (chc) {
+								return function (chd) {
+									return function (eff) {
+										return function (efr) {
+											return function (spd) {
+												return {atkFlat: atkFlat, atkPercent: atkPercent, chc: chc, chd: chd, defFlat: defFlat, defPercent: defPercent, eff: eff, efr: efr, hpFlat: hpFlat, hpPercent: hpPercent, slot: slot, spd: spd};
+											};
+										};
+									};
+								};
+							};
+						};
+					};
+				};
+			};
+		};
+	};
+};
+var author$project$Main$initItem = function (slot) {
+	return author$project$Main$Item(slot)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0);
+};
 var author$project$Main$Stats = F8(
 	function (atk, hp, spd, def, chc, chd, eff, efr) {
 		return {atk: atk, chc: chc, chd: chd, def: def, eff: eff, efr: efr, hp: hp, spd: spd};
@@ -4970,7 +4999,17 @@ var elm$core$Platform$Cmd$batch = _Platform_batch;
 var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var author$project$Main$initialModel = function (_n0) {
 	return _Utils_Tuple2(
-		{addHeroButton: author$project$Main$HideButtonMenu, hero: elm$core$Maybe$Nothing, imageURL: '', items: _List_Nil, modal: elm$core$Maybe$Nothing, name: '', simulatedStats: author$project$Main$initStats},
+		{
+			addHeroButton: author$project$Main$HideButtonMenu,
+			currentItem: author$project$Main$initItem(author$project$Main$Weapon),
+			hero: elm$core$Maybe$Nothing,
+			imageURL: '',
+			items: _List_Nil,
+			modal: elm$core$Maybe$Nothing,
+			name: '',
+			newItem: author$project$Main$initItem(author$project$Main$Weapon),
+			simulatedStats: author$project$Main$initStats
+		},
 		elm$core$Platform$Cmd$none);
 };
 var elm$core$Platform$Sub$batch = _Platform_batch;
@@ -4984,32 +5023,6 @@ var author$project$Main$accumulateStats = F2(
 			aStat,
 			{atkFlat: aStat.atkFlat + bStat.atkFlat, atkPercent: aStat.atkPercent + bStat.atkPercent, chc: aStat.chc + bStat.chc, chd: aStat.chd + bStat.chd, defFlat: aStat.defFlat + bStat.defFlat, defPercent: aStat.defPercent + bStat.defPercent, eff: aStat.eff + bStat.eff, efr: aStat.efr + bStat.efr, hpFlat: aStat.hpFlat + bStat.hpFlat, hpPercent: aStat.hpPercent + bStat.hpPercent, spd: aStat.spd + bStat.spd});
 	});
-var author$project$Main$Item = function (slot) {
-	return function (atkFlat) {
-		return function (atkPercent) {
-			return function (hpFlat) {
-				return function (hpPercent) {
-					return function (defFlat) {
-						return function (defPercent) {
-							return function (chc) {
-								return function (chd) {
-									return function (eff) {
-										return function (efr) {
-											return function (spd) {
-												return {atkFlat: atkFlat, atkPercent: atkPercent, chc: chc, chd: chd, defFlat: defFlat, defPercent: defPercent, eff: eff, efr: efr, hpFlat: hpFlat, hpPercent: hpPercent, slot: slot, spd: spd};
-											};
-										};
-									};
-								};
-							};
-						};
-					};
-				};
-			};
-		};
-	};
-};
-var author$project$Main$Weapon = {$: 'Weapon'};
 var author$project$Main$initCumulativeStats = author$project$Main$Item(author$project$Main$Weapon)(0)(100)(0)(100)(0)(100)(0)(0)(0)(0)(0);
 var elm$core$Basics$round = _Basics_round;
 var author$project$Main$calculateStats = F2(
@@ -6193,7 +6206,8 @@ var author$project$Main$updateModal = F3(
 				model,
 				{
 					modal: elm$core$Maybe$Just(
-						author$project$Main$InputItem(item))
+						author$project$Main$InputItem(item)),
+					newItem: item
 				});
 		}
 	});
@@ -6242,6 +6256,12 @@ var author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					A3(author$project$Main$updateModal, modalMsg, item, model),
 					elm$core$Platform$Cmd$none);
+			case 'Add':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{modal: elm$core$Maybe$Nothing}),
+					elm$core$Platform$Cmd$none);
 			default:
 				return _Utils_Tuple2(
 					_Utils_update(
@@ -6251,7 +6271,7 @@ var author$project$Main$update = F2(
 		}
 	});
 var author$project$Main$applicationSubTitle = 'lo2342342l';
-var author$project$Main$applicationTitle = 'Epic7Seven Gear Calculator';
+var author$project$Main$applicationTitle = 'Epic7Seven Gear Calculator123';
 var elm$json$Json$Decode$map2 = _Json_map2;
 var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 	switch (handler.$) {
@@ -6331,22 +6351,42 @@ var author$project$Main$OpenModal = F2(
 	function (a, b) {
 		return {$: 'OpenModal', a: a, b: b};
 	});
-var elm$virtual_dom$VirtualDom$node = function (tag) {
-	return _VirtualDom_node(
-		_VirtualDom_noScript(tag));
-};
-var elm$html$Html$node = elm$virtual_dom$VirtualDom$node;
-var author$project$Main$area = F2(
-	function (attributes, children) {
-		return A3(elm$html$Html$node, 'area', attributes, children);
+var elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2(elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
 	});
-var author$project$Main$imgMap = F2(
-	function (attributes, children) {
-		return A3(elm$html$Html$node, 'map', attributes, children);
-	});
-var author$project$Main$initItem = function (slot) {
-	return author$project$Main$Item(slot)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0);
+var elm$core$List$head = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return elm$core$Maybe$Just(x);
+	} else {
+		return elm$core$Maybe$Nothing;
+	}
 };
+var author$project$Main$getItemFromInventory = F2(
+	function (slot_, inventory) {
+		var item = elm$core$List$head(
+			A2(
+				elm$core$List$filter,
+				function (item_) {
+					return _Utils_eq(item_.slot, slot_);
+				},
+				inventory));
+		if (item.$ === 'Just') {
+			var a = item.a;
+			return a;
+		} else {
+			return author$project$Main$initItem(slot_);
+		}
+	});
 var elm$core$String$fromFloat = _String_fromNumber;
 var elm$html$Html$p = _VirtualDom_node('p');
 var elm$html$Html$table = _VirtualDom_node('table');
@@ -6358,7 +6398,7 @@ var author$project$Main$showStats = function (stats) {
 		elm$html$Html$div,
 		_List_fromArray(
 			[
-				elm$html$Html$Attributes$class('box statsbox')
+				elm$html$Html$Attributes$class('box statsbox flexauto')
 			]),
 		_List_fromArray(
 			[
@@ -6560,10 +6600,6 @@ var author$project$Main$showStats = function (stats) {
 };
 var elm$core$Basics$neq = _Utils_notEqual;
 var elm$html$Html$img = _VirtualDom_node('img');
-var elm$html$Html$section = _VirtualDom_node('section');
-var elm$html$Html$Attributes$coords = elm$html$Html$Attributes$stringProperty('coords');
-var elm$html$Html$Attributes$name = elm$html$Html$Attributes$stringProperty('name');
-var elm$html$Html$Attributes$shape = elm$html$Html$Attributes$stringProperty('shape');
 var elm$html$Html$Attributes$src = function (url) {
 	return A2(
 		elm$html$Html$Attributes$stringProperty,
@@ -6587,14 +6623,14 @@ var elm$html$Html$Events$onClick = function (msg) {
 		'click',
 		elm$json$Json$Decode$succeed(msg));
 };
-var author$project$Main$image = F2(
-	function (name, stats) {
+var author$project$Main$image = F3(
+	function (name, stats, inventory) {
 		var imageurl = (name === 'Charles') ? 'src/hero_images/charles.jpg' : ((name === 'Bellona') ? 'src/hero_images/bellona.jpg' : ((name === 'Challenger Dominiel') ? 'src/hero_images/challenger-dominiel.jpg' : ((name === 'Martial Artist Ken') ? 'src/hero_images/martial-artist-ken.jpg' : ((name === 'Yufine') ? 'src/hero_images/yufine.jpg' : ((name === 'Sez') ? 'src/hero_images/sez.jpg' : ((name === 'Haste') ? 'src/hero_images/haste.jpg' : ((name === 'Baal&Sezan') ? 'src/hero_images/baal-sezan.jpg' : ((name === 'Karin') ? 'src/hero_images/Karin.jpg' : ((name === 'Vildred') ? 'src/hero_images/vildred.jpg' : '')))))))));
 		return A2(
-			elm$html$Html$section,
+			elm$html$Html$div,
 			_List_fromArray(
 				[
-					elm$html$Html$Attributes$class('section')
+					elm$html$Html$Attributes$class('flexbox')
 				]),
 			_List_fromArray(
 				[
@@ -6602,7 +6638,22 @@ var author$project$Main$image = F2(
 					elm$html$Html$div,
 					_List_fromArray(
 						[
-							elm$html$Html$Attributes$class('container test')
+							elm$html$Html$Attributes$class('space')
+						]),
+					_List_Nil),
+					(name !== '') ? author$project$Main$showStats(stats) : A2(elm$html$Html$div, _List_Nil, _List_Nil),
+					A2(
+					elm$html$Html$div,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$class('space')
+						]),
+					_List_Nil),
+					A2(
+					elm$html$Html$div,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$class('itemimg')
 						]),
 					_List_fromArray(
 						[
@@ -6610,50 +6661,105 @@ var author$project$Main$image = F2(
 							elm$html$Html$img,
 							_List_fromArray(
 								[
+									elm$html$Html$Events$onClick(
+									A2(
+										author$project$Main$OpenModal,
+										author$project$Main$OpenInput,
+										A2(author$project$Main$getItemFromInventory, author$project$Main$Weapon, inventory))),
 									elm$html$Html$Attributes$src(imageurl),
-									elm$html$Html$Attributes$class('test2')
+									elm$html$Html$Attributes$class('rounded')
 								]),
 							_List_Nil),
 							A2(
-							elm$html$Html$div,
+							elm$html$Html$img,
 							_List_fromArray(
 								[
-									elm$html$Html$Attributes$class('itemimg')
+									elm$html$Html$Events$onClick(
+									A2(
+										author$project$Main$OpenModal,
+										author$project$Main$OpenInput,
+										A2(author$project$Main$getItemFromInventory, author$project$Main$Weapon, inventory))),
+									elm$html$Html$Attributes$src(imageurl),
+									elm$html$Html$Attributes$class('rounded')
 								]),
+							_List_Nil),
+							A2(
+							elm$html$Html$img,
 							_List_fromArray(
 								[
+									elm$html$Html$Events$onClick(
 									A2(
-									elm$html$Html$img,
-									_List_fromArray(
-										[
-											elm$html$Html$Events$onClick(
-											A2(
-												author$project$Main$OpenModal,
-												author$project$Main$OpenInput,
-												author$project$Main$initItem(author$project$Main$Weapon))),
-											elm$html$Html$Attributes$src(imageurl)
-										]),
-									_List_Nil),
+										author$project$Main$OpenModal,
+										author$project$Main$OpenInput,
+										A2(author$project$Main$getItemFromInventory, author$project$Main$Weapon, inventory))),
+									elm$html$Html$Attributes$src(imageurl),
+									elm$html$Html$Attributes$class('rounded')
+								]),
+							_List_Nil)
+						])),
+					(imageurl !== '') ? A2(
+					elm$html$Html$img,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$src(imageurl),
+							elm$html$Html$Attributes$class('heroimg')
+						]),
+					_List_Nil) : A2(elm$html$Html$div, _List_Nil, _List_Nil),
+					A2(
+					elm$html$Html$div,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$class('flexauto itemimg')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							elm$html$Html$img,
+							_List_fromArray(
+								[
+									elm$html$Html$Events$onClick(
 									A2(
-									author$project$Main$imgMap,
-									_List_fromArray(
-										[
-											elm$html$Html$Attributes$name('my_map')
-										]),
-									_List_fromArray(
-										[
-											A2(
-											author$project$Main$area,
-											_List_fromArray(
-												[
-													elm$html$Html$Attributes$shape('Rectangle'),
-													elm$html$Html$Attributes$coords('0,0,100,100')
-												]),
-											_List_Nil)
-										]))
-								])),
-							(name !== '') ? author$project$Main$showStats(stats) : A2(elm$html$Html$div, _List_Nil, _List_Nil)
-						]))
+										author$project$Main$OpenModal,
+										author$project$Main$OpenInput,
+										A2(author$project$Main$getItemFromInventory, author$project$Main$Weapon, inventory))),
+									elm$html$Html$Attributes$src(imageurl),
+									elm$html$Html$Attributes$class('rounded')
+								]),
+							_List_Nil),
+							A2(
+							elm$html$Html$img,
+							_List_fromArray(
+								[
+									elm$html$Html$Events$onClick(
+									A2(
+										author$project$Main$OpenModal,
+										author$project$Main$OpenInput,
+										A2(author$project$Main$getItemFromInventory, author$project$Main$Weapon, inventory))),
+									elm$html$Html$Attributes$src(imageurl),
+									elm$html$Html$Attributes$class('rounded')
+								]),
+							_List_Nil),
+							A2(
+							elm$html$Html$img,
+							_List_fromArray(
+								[
+									elm$html$Html$Events$onClick(
+									A2(
+										author$project$Main$OpenModal,
+										author$project$Main$OpenInput,
+										A2(author$project$Main$getItemFromInventory, author$project$Main$Weapon, inventory))),
+									elm$html$Html$Attributes$src(imageurl),
+									elm$html$Html$Attributes$class('rounded')
+								]),
+							_List_Nil)
+						])),
+					A2(
+					elm$html$Html$div,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$class('space')
+						]),
+					_List_Nil)
 				]));
 	});
 var author$project$Main$AddHeroButton = function (a) {
@@ -6837,32 +6943,44 @@ var author$project$Main$viewHeroButton = function (model) {
 			]));
 };
 var author$project$Main$Change = {$: 'Change'};
+var author$project$Main$Add = {$: 'Add'};
 var author$project$Main$CloseModal = {$: 'CloseModal'};
 var elm$html$Html$footer = _VirtualDom_node('footer');
-var author$project$Main$modalFooter = function (modalButtons) {
-	return A2(
-		elm$html$Html$footer,
+var author$project$Main$modalFooter = A2(
+	elm$html$Html$footer,
+	_List_fromArray(
+		[
+			elm$html$Html$Attributes$class('modal-card-foot')
+		]),
+	_Utils_ap(
 		_List_fromArray(
 			[
-				elm$html$Html$Attributes$class('modal-card-foot')
+				A2(
+				elm$html$Html$a,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('button is-success'),
+						elm$html$Html$Events$onClick(author$project$Main$Add)
+					]),
+				_List_fromArray(
+					[
+						elm$html$Html$text('Add Item')
+					]))
 			]),
-		_Utils_ap(
-			modalButtons,
-			_List_fromArray(
-				[
-					A2(
-					elm$html$Html$button,
-					_List_fromArray(
-						[
-							elm$html$Html$Attributes$class('button is-success'),
-							elm$html$Html$Events$onClick(author$project$Main$CloseModal)
-						]),
-					_List_fromArray(
-						[
-							elm$html$Html$text('Schließen')
-						]))
-				])));
-};
+		_List_fromArray(
+			[
+				A2(
+				elm$html$Html$button,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('button is-success'),
+						elm$html$Html$Events$onClick(author$project$Main$CloseModal)
+					]),
+				_List_fromArray(
+					[
+						elm$html$Html$text('Close')
+					]))
+			])));
 var author$project$Main$ariaLabel = function (value) {
 	return A2(elm$html$Html$Attributes$attribute, 'aria-label', value);
 };
@@ -6910,6 +7028,7 @@ var elm$core$String$toInt = _String_toInt;
 var elm$html$Html$fieldset = _VirtualDom_node('fieldset');
 var elm$html$Html$input = _VirtualDom_node('input');
 var elm$html$Html$label = _VirtualDom_node('label');
+var elm$html$Html$section = _VirtualDom_node('section');
 var elm$html$Html$Attributes$type_ = elm$html$Html$Attributes$stringProperty('type');
 var elm$html$Html$Attributes$value = elm$html$Html$Attributes$stringProperty('value');
 var elm$html$Html$Events$alwaysStop = function (x) {
@@ -7471,21 +7590,7 @@ var author$project$Main$inputItem = function (item) {
 											]))
 									]))
 							])),
-						author$project$Main$modalFooter(
-						_List_fromArray(
-							[
-								A2(
-								elm$html$Html$a,
-								_List_fromArray(
-									[
-										elm$html$Html$Attributes$class('button is-success'),
-										elm$html$Html$Events$onClick(author$project$Main$CloseModal)
-									]),
-								_List_fromArray(
-									[
-										elm$html$Html$text('Form hinzufügen')
-									]))
-							]))
+						author$project$Main$modalFooter
 					]))
 			]));
 };
@@ -7525,7 +7630,7 @@ var author$project$Main$view = function (model) {
 			[
 				author$project$Main$viewHeroButton(model),
 				author$project$Main$applicationHeader,
-				A2(author$project$Main$image, model.name, model.simulatedStats),
+				A3(author$project$Main$image, model.name, model.simulatedStats, model.items),
 				author$project$Main$viewModal(model)
 			]));
 };

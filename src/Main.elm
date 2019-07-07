@@ -25,6 +25,8 @@ type alias Model =
     , addHeroButton : AddHeroButtonState
     , imageURL : String
     , modal : Maybe ModalState
+    , newItem : Item
+    , currentItem : Item
     }
 
 
@@ -37,6 +39,8 @@ initialModel _ =
       , addHeroButton = HideButtonMenu
       , imageURL = ""
       , modal = Nothing
+      , newItem = initItem Weapon
+      , currentItem = initItem Weapon
       }
     , Cmd.none
     )
@@ -53,6 +57,7 @@ type Msg
     | CloseModal
     | HeroClicked String AddHeroButtonMsg
     | OpenModal ModalMsg Item
+    | Add
 
 
 
@@ -90,6 +95,9 @@ update msg model =
         OpenModal modalMsg item ->
             ( updateModal modalMsg item model, Cmd.none )
 
+        Add ->
+            ({ model | modal = Nothing}, Cmd.none)--, items = "Fun" :: model.items}
+
         CloseModal ->
             ( { model | modal = Nothing }, Cmd.none )
 
@@ -103,7 +111,7 @@ view model =
     div []
         [ viewHeroButton model
         , applicationHeader
-        , image model.name model.simulatedStats
+        , image model.name model.simulatedStats model.items
         , viewModal model
         ]
 
@@ -395,7 +403,7 @@ calcSkill hero skillId stats =
 
 showStats : Stats -> Html Msg
 showStats stats =
-    div [ class "box statsbox" ]
+    div [ class "box statsbox flexauto" ]
         [ p [ class "title is-5" ] [ text "Stats" ]
         , table [ class "table", class "table is-narrow is-fullwidth" ]
             [ thead []
@@ -564,9 +572,22 @@ applicationHeader =
             ]
         ]
 
+getItemFromInventory : Slot -> List Item -> Item
+getItemFromInventory slot_ inventory =
+    let
+        item =
+            List.head (List.filter (\item_ -> item_.slot == slot_) inventory)
+    in
+    case item of
+        Just a ->
+            a
 
-image : String -> Stats -> Html Msg
-image name stats =
+        Nothing ->
+            initItem slot_
+
+
+image : String -> Stats -> List Item -> Html Msg
+image name stats inventory =
     let
         imageurl =
             if name == "Charles" then
@@ -602,27 +623,29 @@ image name stats =
             else
                 ""
     in
-    section [ class "section" ]
-        [ div [ class "container test" ]
-            [ img
-                [ src imageurl, class "test2" ]
-                []
-            , div [ class "itemimg" ]
-                [ img [ onClick (OpenModal OpenInput (initItem Weapon)), src imageurl ] []
-                , imgMap [ Html.Attributes.name "my_map" ] [ area [ shape "Rectangle", coords "0,0,100,100" ] [] ]
-                ]
-            , if name /= "" then
+     div [ class "flexbox" ]
+            [ 
+             div [class "space"][]
+            ,if name /= "" then
                 showStats stats
-
-              else
+            else
                 div [] []
+            , div [class "space"][]
+            , div [class "itemimg"][ img [ onClick (OpenModal OpenInput (getItemFromInventory Weapon inventory)), src imageurl ,class "rounded"] [],img [ onClick (OpenModal OpenInput (getItemFromInventory Weapon inventory)), src imageurl,class "rounded" ] [],img [ onClick (OpenModal OpenInput (getItemFromInventory Weapon inventory)), src imageurl,class "rounded"] []]
+            ,if imageurl /= "" then img
+                [ src imageurl, class "heroimg" ]
+                []
+                else div [][]
+            , div [ class "flexauto itemimg" ][ img [ onClick (OpenModal OpenInput (getItemFromInventory Weapon inventory)), src imageurl ,class "rounded"] [],img [ onClick (OpenModal OpenInput (getItemFromInventory Weapon inventory)), src imageurl ,class "rounded"] [],img [ onClick (OpenModal OpenInput (getItemFromInventory Weapon inventory)), src imageurl,class "rounded" ] []]
+            , div [class "space"][]
+            
 
             --, if name /= "" then
             -- showSkill skill
             --  else
             --  div [] []
             ]
-        ]
+        
 
 
 viewHeroButton : Model -> Html Msg
@@ -714,7 +737,7 @@ updateModal modalMsg item model =
             { model | modal = Just (InputItem item) }
 
         Change ->
-            { model | modal = Just (InputItem item) }
+            { model | modal = Just (InputItem item), newItem = item }
 
 
 inputItem : Item -> Html Msg
@@ -753,7 +776,7 @@ inputItem item =
         changeItemSpd newSpd =
             OpenModal Change (Item item.slot item.atkFlat item.atkPercent item.hpFlat item.hpPercent item.defFlat item.defPercent item.chc item.chd item.eff item.efr (Maybe.withDefault 0 (String.toInt newSpd)))
     in
-    div [class "modal-card"]
+    div [ class "modal-card" ]
         [ modalHeader "" --s
         , section [ class "modal-card-body" ]
             [ fieldset []
@@ -822,18 +845,19 @@ inputItem item =
                         ]
                     ]
                 ]
-                , modalFooter [ a [ class "button is-success", onClick CloseModal ] [ text "Form hinzufügen" ] ]
+            , modalFooter
             ]
-            
         ]
 
 
 inputItemInModal : Item -> Html Msg
 inputItemInModal item =
-         inputItem item
-        --, modalFooter
-        --    [ a [ class "button is-success", onClick CloseModal ] [ text "Form hinzufügen" ] ]
-        
+    inputItem item
+
+
+
+--, modalFooter
+--    [ a [ class "button is-success", onClick CloseModal ] [ text "Form hinzufügen" ] ]
 
 
 viewModal : Model -> Html Msg
@@ -845,12 +869,12 @@ viewModal model =
         Just modalState ->
             div [ class "modal is-active" ]
                 [ div [ class "modal-background" ] []
-                ,case modalState of
-                        InputItem item ->
-                            inputItem item
+                , case modalState of
+                    InputItem item ->
+                        inputItem item
 
-                    --inputItemInModal string
-                    ]
+                --inputItemInModal string
+                ]
 
 
 modalHeader : String -> Html Msg
@@ -861,11 +885,11 @@ modalHeader title =
         ]
 
 
-modalFooter : List (Html Msg) -> Html Msg
-modalFooter modalButtons =
+modalFooter : Html Msg
+modalFooter =
     footer [ class "modal-card-foot" ]
-        (modalButtons
-            ++ [ button [ class "button is-success", onClick CloseModal ] [ text "Schließen" ]
+        ([ a [ class "button is-success", onClick Add] [ text "Add Item" ] ]
+            ++ [ button [ class "button is-success", onClick CloseModal ] [ text "Close" ]
                ]
         )
 
