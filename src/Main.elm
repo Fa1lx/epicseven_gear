@@ -631,38 +631,26 @@ image name stats inventory =
             else
                 ""
     in
+    if name /= "" then 
     div [ class "flexbox" ]
         [ div [ class "space" ] []
-        , if name /= "" then
-            showStats stats
-
-          else
-            div [] []
+        , showStats stats
         , div [ class "space" ] []
         , div [ class "itemimg" ]
-            [ img [ onClick (OpenModal OpenInput (getItemFromInventory Weapon inventory)), src imageurl, class "rounded" ] []
-            , img [ onClick (OpenModal OpenInput (getItemFromInventory Helmet inventory)), src imageurl, class "rounded" ] []
-            , img [ onClick (OpenModal OpenInput (getItemFromInventory Armor inventory)), src imageurl, class "rounded" ] []
+            [ img [ onClick (OpenModal OpenInput (getItemFromInventory Weapon inventory)), src "src/item-images/weapon.png", class "rounded" ] []
+            , img [ onClick (OpenModal OpenInput (getItemFromInventory Helmet inventory)), src "src/item-images/helmet.png", class "rounded" ] []
+            , img [ onClick (OpenModal OpenInput (getItemFromInventory Armor inventory)), src "src/item-images/armor.png", class "rounded" ] []
             ]
-        , if imageurl /= "" then
-            img
-                [ src imageurl, class "heroimg" ]
-                []
-
-          else
-            div [] []
+        , img
+            [ src imageurl, class "heroimg" ] []
         , div [ class "flexauto itemimg" ]
-            [ img [ onClick (OpenModal OpenInput (getItemFromInventory Necklace inventory)), src imageurl, class "rounded" ] []
-            , img [ onClick (OpenModal OpenInput (getItemFromInventory Ring inventory)), src imageurl, class "rounded" ] []
-            , img [ onClick (OpenModal OpenInput (getItemFromInventory Boots inventory)), src imageurl, class "rounded" ] []
+            [ img [ onClick (OpenModal OpenInput (getItemFromInventory Necklace inventory)), src "src/item-images/necklace.png", class "rounded" ] []
+            , img [ onClick (OpenModal OpenInput (getItemFromInventory Ring inventory)), src "src/item-images/ring.png", class "rounded" ] []
+            , img [ onClick (OpenModal OpenInput (getItemFromInventory Boots inventory)), src "src/item-images/boots.png", class "rounded" ] []
             ]
         , div [ class "space" ] []
-
-        --, if name /= "" then
-        -- showSkill skill
-        --  else
-        --  div [] []
         ]
+    else div[][]
 
 
 viewHeroButton : Model -> Html Msg
