@@ -545,12 +545,12 @@ updateAddHeroButton addHeroButtonMsg model =
 
 applicationTitle : String.String
 applicationTitle =
-    "Epic7Seven Gear Calculator"
+    "Epic7Seven Gear Calculator123"
 
 
 applicationSubTitle : String.String
 applicationSubTitle =
-    "lol"
+    "lo2342342l"
 
 
 applicationHeader : Html Msg
@@ -753,9 +753,9 @@ inputItem item =
         changeItemSpd newSpd =
             OpenModal Change (Item item.slot item.atkFlat item.atkPercent item.hpFlat item.hpPercent item.defFlat item.defPercent item.chc item.chd item.eff item.efr (Maybe.withDefault 0 (String.toInt newSpd)))
     in
-    div []
+    div [class "modal-card"]
         [ modalHeader "" --s
-        , section [ class "modal-card-body modal1" ]
+        , section [ class "modal-card-body" ]
             [ fieldset []
                 [ div []
                     [ text "Atk"
@@ -822,17 +822,18 @@ inputItem item =
                         ]
                     ]
                 ]
+                , modalFooter [ a [ class "button is-success", onClick CloseModal ] [ text "Form hinzufügen" ] ]
             ]
+            
         ]
 
 
 inputItemInModal : Item -> Html Msg
 inputItemInModal item =
-    div []
-        [ inputItem item
-        , modalFooter
-            [ a [ class "button is-success", onClick CloseModal ] [ text "Form hinzufügen" ] ]
-        ]
+         inputItem item
+        --, modalFooter
+        --    [ a [ class "button is-success", onClick CloseModal ] [ text "Form hinzufügen" ] ]
+        
 
 
 viewModal : Model -> Html Msg
@@ -844,33 +845,12 @@ viewModal model =
         Just modalState ->
             div [ class "modal is-active" ]
                 [ div [ class "modal-background" ] []
-                , div [ class "modal-card" ]
-                    [ case modalState of
+                ,case modalState of
                         InputItem item ->
-                            inputItemInModal item
+                            inputItem item
 
                     --inputItemInModal string
                     ]
-                ]
-
-
-machwas : Html Msg
-machwas =
-    div [ class "modal-card" ]
-        [ modalHeader "Tabelle der Formen"
-        , section [ class "modal-card-body" ]
-            [ table [ class "table" ]
-                [ thead []
-                    [ tr []
-                        [ th [] [ text "Laufende Nummer" ]
-                        , th [] [ text "Gebietstyp" ]
-                        , th [] [ text "Gebietskoordinaten" ]
-                        ]
-                    ]
-                ]
-            ]
-        , modalFooter []
-        ]
 
 
 modalHeader : String -> Html Msg
