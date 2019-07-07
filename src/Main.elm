@@ -183,18 +183,7 @@ type alias Skill =
 
 type alias Item =
     { slot : Slot
-    , affixes : List Affix
-    }
-
-
-type alias Affix =
-    { value : Int
-    , stat : Stat
-    }
-
-
-type alias CumulativeStats =
-    { atkFlat : Int
+    , atkFlat : Int
     , atkPercent : Int
     , hpFlat : Int
     , hpPercent : Int
@@ -207,13 +196,10 @@ type alias CumulativeStats =
     , spd : Int
     }
 
-initItem: Slot -> Item
-initItem slot = 
-    Item slot []
 
-initCumulativeStats : CumulativeStats
+initCumulativeStats : Item
 initCumulativeStats =
-    CumulativeStats 0 100 0 100 0 100 0 0 0 0 0
+    Item Weapon 0 100 0 100 0 100 0 0 0 0 0
 
 
 type Slot
@@ -238,22 +224,6 @@ type Stat
     | Eff
     | EfR
     | Speed
-
-
-
--- Basic template to define certain key enemies you fight very often in the game to measure your damage against those
-
-
-type alias Enemy =
-    { name : String
-    , element : String
-    , hpValue : Int
-    , defValue : Int
-    }
-
-
-
---TODO: create record for Wyvern11, Golem11, Banshee11, A11
 
 
 type alias Modifier =
@@ -314,7 +284,7 @@ calculateStats heroStats items =
                 accumulateStats
                 --to normalize the % values
                 initCumulativeStats
-                (map affixToStats (concatMap (\item -> item.affixes) items))
+                items
     in
     { heroStats
         | atk = round (toFloat heroStats.atk * (toFloat cStats.atkPercent / 100)) + cStats.atkFlat
@@ -328,7 +298,7 @@ calculateStats heroStats items =
     }
 
 
-accumulateStats : CumulativeStats -> CumulativeStats -> CumulativeStats
+accumulateStats : Item -> Item -> Item
 accumulateStats aStat bStat =
     { aStat
         | atkFlat = aStat.atkFlat + bStat.atkFlat
@@ -343,47 +313,6 @@ accumulateStats aStat bStat =
         , efr = aStat.efr + bStat.efr
         , spd = aStat.spd + bStat.spd
     }
-
-
-affixToStats : Affix -> CumulativeStats
-affixToStats affix =
-    let
-        cStats =
-            initCumulativeStats
-    in
-    case affix.stat of
-        Atk ->
-            { cStats | atkFlat = cStats.atkFlat + affix.value }
-
-        AtkPercent ->
-            { cStats | atkPercent = cStats.atkPercent + affix.value }
-
-        HP ->
-            { cStats | hpFlat = cStats.hpFlat + affix.value }
-
-        HPPercent ->
-            { cStats | hpPercent = cStats.hpPercent + affix.value }
-
-        Def ->
-            { cStats | defFlat = cStats.defFlat + affix.value }
-
-        DefPercent ->
-            { cStats | defPercent = cStats.defPercent + affix.value }
-
-        ChC ->
-            { cStats | chc = cStats.chc + affix.value }
-
-        ChD ->
-            { cStats | chd = cStats.chd + affix.value }
-
-        Eff ->
-            { cStats | eff = cStats.eff + affix.value }
-
-        EfR ->
-            { cStats | efr = cStats.efr + affix.value }
-
-        Speed ->
-            { cStats | spd = cStats.spd + affix.value }
 
 
 updateSkillMod : Modifier -> SkillModifier -> SkillModifier
@@ -753,9 +682,9 @@ updateModal modalMsg item model =
 
 inputItem : Item -> Html Msg
 inputItem item =
--- case item of 
+    -- case item of
     div []
-        [ modalHeader ""--s
+        [ modalHeader "" --s
         , section [ class "modal-card-body modal1" ]
             [ fieldset []
                 [ div [ class "field" ]
