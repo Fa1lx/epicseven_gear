@@ -1,14 +1,15 @@
 module Main exposing (main)
 
 import Browser
-import Html exposing (Attribute, Html, a, button, div, fieldset, footer, h1, h2, header, i, img, input, label, node, p, section, span, table, text, th, thead, tr)
-import Html.Attributes exposing (class, coords, href, id, name, shape, src, style, type_, usemap, value)
-import Html.Events exposing (onClick, onInput)
+import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (..)
 import Http
 import Json.Decode as Decode exposing (Decoder, field, string)
 import List exposing (..)
 import List.Extra
-import String
+import Maybe exposing (withDefault)
+import String exposing (toInt)
 
 
 
@@ -280,7 +281,7 @@ calculateStats : Stats -> List Item -> Stats
 calculateStats heroStats items =
     let
         cStats =
-            foldl
+            List.foldl
                 accumulateStats
                 --to normalize the % values
                 initCumulativeStats
@@ -350,7 +351,7 @@ updateSkillMod modifier skillMod =
 
 convertSkillToSkillMod : Skill -> SkillModifier
 convertSkillToSkillMod skill =
-    foldl updateSkillMod initSkillMod skill.modifiers
+    List.foldl updateSkillMod initSkillMod skill.modifiers
 
 
 calculateDmgOfSkill : Stats -> SkillModifier -> Int
@@ -364,34 +365,14 @@ calculateDmgOfSkill heroStats skillMod =
         )
 
 
-calcSkill1 : Hero -> Stats -> Int
-calcSkill1 hero stats =
-    case List.Extra.getAt 0 hero.skills of
+calcSkill : Hero -> Int -> Stats -> Int
+calcSkill hero skillId stats =
+    case List.Extra.getAt skillId hero.skills of
         Nothing ->
             0
 
-        Just skill1 ->
-            calculateDmgOfSkill stats (convertSkillToSkillMod skill1)
-
-
-calcSkill2 : Hero -> Stats -> Int
-calcSkill2 hero stats =
-    case List.Extra.getAt 1 hero.skills of
-        Nothing ->
-            0
-
-        Just skill2 ->
-            calculateDmgOfSkill stats (convertSkillToSkillMod skill2)
-
-
-calcSkill3 : Hero -> Stats -> Int
-calcSkill3 hero stats =
-    case List.Extra.getAt 2 hero.skills of
-        Nothing ->
-            0
-
-        Just skill3 ->
-            calculateDmgOfSkill stats (convertSkillToSkillMod skill3)
+        Just skill ->
+            calculateDmgOfSkill stats (convertSkillToSkillMod skill)
 
 
 
@@ -442,41 +423,75 @@ showStats stats =
 
 
 showSkill : SkillModifier -> Html Msg
-showSkill stats =
-    div [ class "box statsbox" ]
-        [ p [ class "title is-5" ] [ text "Stats" ]
+showSkill modifier =
+    div [ class "box modifierbox" ]
+        [ p [ class "title is-5" ] [ text "Modifier" ]
         , table [ class "table", class "table is-narrow is-fullwidth" ]
             [ thead []
                 [ tr []
                     [ Html.td [] [ text "dafaultMulti" ]
-                    , Html.td [] [ text (String.fromFloat stats.defaultMulti) ]
+                    , Html.td [] [ text (String.fromFloat modifier.defaultMulti) ]
                     ]
                 , tr []
                     [ Html.td [] [ text "enemyHP" ]
-                    , Html.td [] [ text (String.fromFloat stats.enemyHP) ]
+                    , Html.td [] [ text (String.fromFloat modifier.enemyHP) ]
                     ]
                 , tr []
                     [ Html.td [] [ text "ownAtk" ]
-                    , Html.td [] [ text (String.fromFloat stats.ownAtk) ]
+                    , Html.td [] [ text (String.fromFloat modifier.ownAtk) ]
                     ]
                 , tr []
                     [ Html.td [] [ text "ownDef" ]
-                    , Html.td [] [ text (String.fromFloat stats.ownDef) ]
+                    , Html.td [] [ text (String.fromFloat modifier.ownDef) ]
                     ]
                 , tr []
                     [ Html.td [] [ text "ownHP" ]
-                    , Html.td [] [ text (String.fromFloat stats.ownHP) ]
+                    , Html.td [] [ text (String.fromFloat modifier.ownHP) ]
                     ]
                 , tr []
                     [ Html.td [] [ text "ownSpeed" ]
-                    , Html.td [] [ text (String.fromFloat stats.ownSpeed) ]
+                    , Html.td [] [ text (String.fromFloat modifier.ownSpeed) ]
                     ]
                 , tr []
                     [ Html.td [] [ text "pow" ]
-                    , Html.td [] [ text (String.fromFloat stats.pow) ]
+                    , Html.td [] [ text (String.fromFloat modifier.pow) ]
                     ]
                 ]
             ]
+        ]
+
+
+createSkillEntity : Hero -> Stats -> Int -> Html Msg
+createSkillEntity hero stats skillId =
+    let
+        skill =
+            List.Extra.getAt skillId hero.skills
+    in
+    tr []
+        [ td []
+            [ [ tr []
+                    [ td [] [ text "Skill Name:" ]
+                    , td [] [ text skill.name ]
+                    ]
+              , tr []
+                    [ td [] [ text "Cooldown:" ]
+                    , td [] [ text skill.cooldown ]
+                    ]
+              , tr []
+                    [ td [] [ text "isPassive:" ]
+                    , td [] [ text skill.isPassive ]
+                    ]
+              , tr []
+                    [ td [] [ text "Damage:" ]
+                    , td [] [ text (calculateDmgOfSkill stats skillId) ]
+                    ]
+              , tr []
+                    [ td [] [ text "Description:" ]
+                    , td [] [ text skill.description ]
+                    ]
+              ]
+            ]
+        , td [] [ showSkill (convertSkillToSkillMod skill) ]
         ]
 
 
