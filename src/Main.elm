@@ -11,7 +11,7 @@ import Json.Decode as Decode exposing (Decoder, field, string)
 import List exposing (..)
 import List.Extra
 import Maybe exposing (withDefault)
-import String exposing (toInt)
+import String exposing (toInt, concat)
 import Task
 
 
@@ -129,6 +129,10 @@ view model =
         , applicationHeader
         , image model.name model.simulatedStats model.items
         , viewModal model
+        , div[][]
+        , createSkillEntity model.hero model.simulatedStats 0
+        , createSkillEntity model.hero model.simulatedStats 1
+        , createSkillEntity model.hero model.simulatedStats 2
         ]
 
 
@@ -505,26 +509,20 @@ showSkill modifier =
                 [ tr []
                     [ Html.td [] [ text "dafaultMulti" ]
                     , Html.td [] [ text (String.fromFloat modifier.defaultMulti) ]
-                    ]
-                , tr []
-                    [ Html.td [] [ text "enemyHP" ]
-                    , Html.td [] [ text (String.fromFloat modifier.enemyHP) ]
+                    , td [] [text "enemyHP"]
+                    , td [] [text (String.fromFloat modifier.enemyHP)]
                     ]
                 , tr []
                     [ Html.td [] [ text "ownAtk" ]
                     , Html.td [] [ text (String.fromFloat modifier.ownAtk) ]
-                    ]
-                , tr []
-                    [ Html.td [] [ text "ownDef" ]
-                    , Html.td [] [ text (String.fromFloat modifier.ownDef) ]
+                    , td [] [ text "ownDef" ]
+                    , td [] [ text (String.fromFloat modifier.ownDef) ]
                     ]
                 , tr []
                     [ Html.td [] [ text "ownHP" ]
                     , Html.td [] [ text (String.fromFloat modifier.ownHP) ]
-                    ]
-                , tr []
-                    [ Html.td [] [ text "ownSpeed" ]
-                    , Html.td [] [ text (String.fromFloat modifier.ownSpeed) ]
+                    , td [] [ text "ownSpeed" ]
+                    , td [] [ text (String.fromFloat modifier.ownSpeed) ]
                     ]
                 , tr []
                     [ Html.td [] [ text "pow" ]
@@ -535,42 +533,53 @@ showSkill modifier =
         ]
 
 
-createSkillEntity : Hero -> Stats -> Int -> Html Msg
-createSkillEntity hero stats skillId =
-    let
-        skill =
-            case List.Extra.getAt skillId hero.skills of
-                Just a ->
-                    a
+createSkillEntity : Maybe Hero -> Stats -> Int -> Html Msg
+createSkillEntity hero_ stats skillId =
+    case hero_ of
+        Nothing -> div[][]
+        Just hero -> 
+            let
+                skill =
+                    case List.Extra.getAt skillId hero.skills of
+                        Just a ->
+                           a
 
-                Nothing ->
-                    dummySkill
-    in
-    td []
-        [ td []
-            [ tr []
-                [ td [] [ text "Skill Name:" ]
-                , td [] [ text skill.name ]
-                ]
-            , tr []
-                [ td [] [ text "Cooldown:" ]
-                , td [] [ text (String.fromInt skill.cooldown) ]
-                ]
-            , tr []
-                [ td [] [ text "isPassive:" ]
-                , td [] [ text (Bool.Extra.toString skill.isPassive) ]
-                ]
-            , tr []
-                [ td [] [ text "Damage:" ]
-                , td [] [ text (String.fromInt (calculateDmgOfSkill stats (convertSkillToSkillMod skill))) ]
-                ]
-            , tr []
-                [ td [] [ text "Description:" ]
-                , td [] [ text (Maybe.withDefault "" skill.description) ]
-                ]
-            ]
-        , td [] [ showSkill (convertSkillToSkillMod skill) ]
-        ]
+                        Nothing ->
+                         dummySkill
+            in
+                div [ class "box skillbox" ]
+                    [ p [ class "title is-5" ] [ text (concat["Skill ",String.fromInt(skillId+1)]) ]
+                    , table [ class "table", class "table is-narrow is-fullwidth" ]
+                        [ thead [][
+                            td []
+                                [ td []
+                                    [ tr []
+                                    [ td [] [ text "Skill Name:" ]
+                                        , td [] [ text skill.name ]
+                                    ]
+                                    , tr []
+                                    [ td [] [ text "Cooldown:" ]
+                                        , td [] [ text (String.fromInt skill.cooldown) ]
+                                        ]
+                                    , tr []
+                                    [ td [] [ text "isPassive:" ]
+                                    , td [] [ text (Bool.Extra.toString skill.isPassive) ]
+                                    ]
+                                , tr []
+                                    [ td [] [ text "Damage:" ]
+                                    , td [] [ text (String.fromInt (calculateDmgOfSkill stats (convertSkillToSkillMod skill))) ]
+                                    ]
+                                , tr []
+                                    [ td [] [ text "Description:" ]
+                            , td [] [ text (Maybe.withDefault "" skill.description) ]
+                                        ]
+                                ]
+                                , td [] [ showSkill (convertSkillToSkillMod skill) ]
+                                
+                                ]
+                        ]
+                        ]
+                    ]
 
 
 type AddHeroButtonMsg
