@@ -7860,7 +7860,7 @@ var elm$html$Html$Events$onClick = function (msg) {
 		'click',
 		elm$json$Json$Decode$succeed(msg));
 };
-var author$project$Main$image = F3(
+var author$project$Main$mainContent = F3(
 	function (name, stats, inventory) {
 		var imageurl = (name === 'Charles') ? 'src/hero_images/charles.jpg' : ((name === 'Bellona') ? 'src/hero_images/bellona.jpg' : ((name === 'Challenger Dominiel') ? 'src/hero_images/challenger-dominiel.jpg' : ((name === 'Martial Artist Ken') ? 'src/hero_images/martial-artist-ken.jpg' : ((name === 'Yufine') ? 'src/hero_images/yufine.jpg' : ((name === 'Sez') ? 'src/hero_images/sez.jpg' : ((name === 'Haste') ? 'src/hero_images/haste.jpg' : ((name === 'Baal&Sezan') ? 'src/hero_images/baal-sezan.jpg' : ((name === 'Karin') ? 'src/hero_images/Karin.jpg' : ((name === 'Vildred') ? 'src/hero_images/vildred.jpg' : '')))))))));
 		return (name !== '') ? A2(
@@ -8871,7 +8871,7 @@ var author$project$Main$view = function (model) {
 			[
 				author$project$Main$viewHeroButton(model),
 				author$project$Main$applicationHeader,
-				A3(author$project$Main$image, model.name, model.simulatedStats, model.items),
+				A3(author$project$Main$mainContent, model.name, model.simulatedStats, model.items),
 				author$project$Main$viewModal(model),
 				A3(author$project$Main$createSkillEntity, model.hero, model.simulatedStats, 0),
 				A3(author$project$Main$createSkillEntity, model.hero, model.simulatedStats, 1),

@@ -194,68 +194,6 @@ applicationHeader =
         ]
 
 
-mainContent : String -> Stats -> List Item -> Html Msg
-mainContent name stats inventory =
-    let
-        imageurl =
-            if name == "Charles" then
-                "src/hero_images/charles.jpg"
-
-            else if name == "Bellona" then
-                "src/hero_images/bellona.jpg"
-
-            else if name == "Challenger Dominiel" then
-                "src/hero_images/challenger-dominiel.jpg"
-
-            else if name == "Martial Artist Ken" then
-                "src/hero_images/martial-artist-ken.jpg"
-
-            else if name == "Yufine" then
-                "src/hero_images/yufine.jpg"
-
-            else if name == "Sez" then
-                "src/hero_images/sez.jpg"
-
-            else if name == "Haste" then
-                "src/hero_images/haste.jpg"
-
-            else if name == "Baal&Sezan" then
-                "src/hero_images/baal-sezan.jpg"
-
-            else if name == "Karin" then
-                "src/hero_images/Karin.jpg"
-
-            else if name == "Vildred" then
-                "src/hero_images/vildred.jpg"
-
-            else
-                ""
-    in
-    if name /= "" then
-        div [ class "flexbox" ]
-            [ div [ class "space" ] []
-            , showStats stats name
-            , div [ class "space" ] []
-            , div [ class "itemimg" ]
-                [ img [ onClick (OpenModal OpenInput (getItemFromInventory Weapon inventory)), src "src/item-images/weapon.png", class "rounded" ] []
-                , img [ onClick (OpenModal OpenInput (getItemFromInventory Helmet inventory)), src "src/item-images/helmet.png", class "rounded" ] []
-                , img [ onClick (OpenModal OpenInput (getItemFromInventory Armor inventory)), src "src/item-images/armor.png", class "rounded" ] []
-                ]
-            , img
-                [ src imageurl, class "heroimg" ]
-                []
-            , div [ class "flexauto itemimg" ]
-                [ img [ onClick (OpenModal OpenInput (getItemFromInventory Necklace inventory)), src "src/item-images/necklace.png", class "rounded" ] []
-                , img [ onClick (OpenModal OpenInput (getItemFromInventory Ring inventory)), src "src/item-images/ring.png", class "rounded" ] []
-                , img [ onClick (OpenModal OpenInput (getItemFromInventory Boots inventory)), src "src/item-images/boots.png", class "rounded" ] []
-                ]
-            , div [ class "space" ] []
-            ]
-
-    else
-        div [] [ img [ src "https://static.smilegatemegaport.com/event/live/epic7/world/brand/images/common/img_share_630.jpg", class "openimage" ] [] ]
-
-
 viewHeroButton : Model -> Html Msg
 viewHeroButton model =
     let
@@ -324,9 +262,66 @@ heroDropDownElement name =
         [ text name ]
 
 
-onClickNoBubblingUp : msg -> Attribute msg
-onClickNoBubblingUp msg =
-    Html.Events.stopPropagationOn "click" (Decode.map (\m -> ( m, True )) (Decode.succeed msg))
+mainContent : String -> Stats -> List Item -> Html Msg
+mainContent name stats inventory =
+    let
+        imageurl =
+            if name == "Charles" then
+                "src/hero_images/charles.jpg"
+
+            else if name == "Bellona" then
+                "src/hero_images/bellona.jpg"
+
+            else if name == "Challenger Dominiel" then
+                "src/hero_images/challenger-dominiel.jpg"
+
+            else if name == "Martial Artist Ken" then
+                "src/hero_images/martial-artist-ken.jpg"
+
+            else if name == "Yufine" then
+                "src/hero_images/yufine.jpg"
+
+            else if name == "Sez" then
+                "src/hero_images/sez.jpg"
+
+            else if name == "Haste" then
+                "src/hero_images/haste.jpg"
+
+            else if name == "Baal&Sezan" then
+                "src/hero_images/baal-sezan.jpg"
+
+            else if name == "Karin" then
+                "src/hero_images/Karin.jpg"
+
+            else if name == "Vildred" then
+                "src/hero_images/vildred.jpg"
+
+            else
+                ""
+    in
+    if name /= "" then
+        div [ class "flexbox" ]
+            [ div [ class "space" ] []
+            , showStats stats name
+            , div [ class "space" ] []
+            , div [ class "itemimg" ]
+                [ img [ onClick (OpenModal OpenInput (getItemFromInventory Weapon inventory)), src "src/item-images/weapon.png", class "rounded" ] []
+                , img [ onClick (OpenModal OpenInput (getItemFromInventory Helmet inventory)), src "src/item-images/helmet.png", class "rounded" ] []
+                , img [ onClick (OpenModal OpenInput (getItemFromInventory Armor inventory)), src "src/item-images/armor.png", class "rounded" ] []
+                ]
+            , img
+                [ src imageurl, class "heroimg" ]
+                []
+            , div [ class "flexauto itemimg" ]
+                [ img [ onClick (OpenModal OpenInput (getItemFromInventory Necklace inventory)), src "src/item-images/necklace.png", class "rounded" ] []
+                , img [ onClick (OpenModal OpenInput (getItemFromInventory Ring inventory)), src "src/item-images/ring.png", class "rounded" ] []
+                , img [ onClick (OpenModal OpenInput (getItemFromInventory Boots inventory)), src "src/item-images/boots.png", class "rounded" ] []
+                ]
+            , div [ class "space" ] []
+            ]
+
+    else
+        div [] [ img [ src "https://static.smilegatemegaport.com/event/live/epic7/world/brand/images/common/img_share_630.jpg", class "openimage" ] [] ]
 
 
 
@@ -1063,3 +1058,8 @@ indexOf item items =
         |> List.map Tuple.first
         |> List.minimum
         |> Maybe.withDefault -1
+
+
+onClickNoBubblingUp : msg -> Attribute msg
+onClickNoBubblingUp msg =
+    Html.Events.stopPropagationOn "click" (Decode.map (\m -> ( m, True )) (Decode.succeed msg))
