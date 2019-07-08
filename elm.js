@@ -7142,53 +7142,88 @@ var author$project$Main$applicationHeader = A2(
 						]))
 				]))
 		]));
-var author$project$Main$Armor = {$: 'Armor'};
-var author$project$Main$Boots = {$: 'Boots'};
-var author$project$Main$Helmet = {$: 'Helmet'};
-var author$project$Main$Necklace = {$: 'Necklace'};
-var author$project$Main$OpenInput = {$: 'OpenInput'};
-var author$project$Main$OpenModal = F2(
-	function (a, b) {
-		return {$: 'OpenModal', a: a, b: b};
-	});
-var author$project$Main$Ring = {$: 'Ring'};
-var elm$core$List$head = function (list) {
-	if (list.b) {
-		var x = list.a;
-		var xs = list.b;
-		return elm$core$Maybe$Just(x);
-	} else {
-		return elm$core$Maybe$Nothing;
-	}
+var Chadtech$elm_bool_extra$Bool$Extra$toString = function (bool) {
+	return bool ? 'True' : 'False';
 };
-var author$project$Main$getItemFromInventory = F2(
-	function (slot_, inventory) {
-		var item = elm$core$List$head(
-			A2(
-				elm$core$List$filter,
-				function (item_) {
-					return _Utils_eq(item_.slot, slot_);
-				},
-				inventory));
-		if (item.$ === 'Just') {
-			var a = item.a;
-			return a;
-		} else {
-			return author$project$Main$initItem(slot_);
+var author$project$Main$calculateDmgOfSkill = F2(
+	function (heroStats, skillMod) {
+		return elm$core$Basics$floor(
+			((((((heroStats.atk * skillMod.ownAtk) + (heroStats.hp * skillMod.ownHP)) + (heroStats.def * skillMod.ownDef)) * skillMod.pow) * skillMod.defaultMulti) * (1.0 + (heroStats.spd * skillMod.ownSpeed))) * (1.0 + ((heroStats.chc >= 100) ? (heroStats.chd - 100.0) : ((heroStats.chc / 100.0) * (heroStats.chd - 100.0)))));
+	});
+var author$project$Main$SkillModifier = F7(
+	function (defaultMulti, pow, ownAtk, ownHP, ownDef, ownSpeed, enemyHP) {
+		return {defaultMulti: defaultMulti, enemyHP: enemyHP, ownAtk: ownAtk, ownDef: ownDef, ownHP: ownHP, ownSpeed: ownSpeed, pow: pow};
+	});
+var author$project$Main$initSkillMod = A7(author$project$Main$SkillModifier, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+var author$project$Main$updateSkillMod = F2(
+	function (modifier, skillMod) {
+		var _n0 = modifier.section;
+		switch (_n0.$) {
+			case 'Pow':
+				return _Utils_update(
+					skillMod,
+					{pow: modifier.value});
+			case 'Additive':
+				var _n1 = modifier.target;
+				if ((_n1.$ === 'Just') && (_n1.a.$ === 'Target')) {
+					var _n2 = _n1.a;
+					return _Utils_update(
+						skillMod,
+						{enemyHP: modifier.value});
+				} else {
+					var _n3 = modifier.category;
+					if (_n3.$ === 'Just') {
+						var stat = _n3.a;
+						switch (stat.$) {
+							case 'Atk':
+								return _Utils_update(
+									skillMod,
+									{ownAtk: modifier.value});
+							case 'HP':
+								return _Utils_update(
+									skillMod,
+									{ownHP: modifier.value});
+							default:
+								return _Utils_update(
+									skillMod,
+									{ownDef: modifier.value});
+						}
+					} else {
+						return author$project$Main$initSkillMod;
+					}
+				}
+			default:
+				return _Utils_update(
+					skillMod,
+					{ownSpeed: modifier.value});
 		}
 	});
+var author$project$Main$convertSkillToSkillMod = function (skill) {
+	return A3(elm$core$List$foldl, author$project$Main$updateSkillMod, author$project$Main$initSkillMod, skill.modifiers);
+};
+var author$project$Main$dummyMod = A5(author$project$Main$Modifier, elm$core$Maybe$Nothing, elm$core$Maybe$Nothing, author$project$Main$Pow, 0.0, 0.0);
+var author$project$Main$dummySkill = A7(
+	author$project$Main$Skill,
+	true,
+	0,
+	elm$core$Maybe$Just(''),
+	0,
+	'Dummy SKill',
+	elm$core$Maybe$Just(''),
+	_List_fromArray(
+		[author$project$Main$dummyMod]));
 var elm$core$String$fromFloat = _String_fromNumber;
 var elm$html$Html$p = _VirtualDom_node('p');
 var elm$html$Html$table = _VirtualDom_node('table');
 var elm$html$Html$td = _VirtualDom_node('td');
 var elm$html$Html$thead = _VirtualDom_node('thead');
 var elm$html$Html$tr = _VirtualDom_node('tr');
-var author$project$Main$showStats = function (stats) {
+var author$project$Main$showSkill = function (modifier) {
 	return A2(
 		elm$html$Html$div,
 		_List_fromArray(
 			[
-				elm$html$Html$Attributes$class('box statsbox flexauto')
+				elm$html$Html$Attributes$class('box modifierbox')
 			]),
 		_List_fromArray(
 			[
@@ -7200,7 +7235,7 @@ var author$project$Main$showStats = function (stats) {
 					]),
 				_List_fromArray(
 					[
-						elm$html$Html$text('Stats')
+						elm$html$Html$text('Modifier')
 					])),
 				A2(
 				elm$html$Html$table,
@@ -7226,7 +7261,7 @@ var author$project$Main$showStats = function (stats) {
 										_List_Nil,
 										_List_fromArray(
 											[
-												elm$html$Html$text('Hitpoints')
+												elm$html$Html$text('dafaultMulti')
 											])),
 										A2(
 										elm$html$Html$td,
@@ -7234,7 +7269,22 @@ var author$project$Main$showStats = function (stats) {
 										_List_fromArray(
 											[
 												elm$html$Html$text(
-												elm$core$String$fromInt(stats.hp))
+												elm$core$String$fromFloat(modifier.defaultMulti))
+											])),
+										A2(
+										elm$html$Html$td,
+										_List_Nil,
+										_List_fromArray(
+											[
+												elm$html$Html$text('enemyHP')
+											])),
+										A2(
+										elm$html$Html$td,
+										_List_Nil,
+										_List_fromArray(
+											[
+												elm$html$Html$text(
+												elm$core$String$fromFloat(modifier.enemyHP))
 											]))
 									])),
 								A2(
@@ -7247,7 +7297,7 @@ var author$project$Main$showStats = function (stats) {
 										_List_Nil,
 										_List_fromArray(
 											[
-												elm$html$Html$text('Attack')
+												elm$html$Html$text('ownAtk')
 											])),
 										A2(
 										elm$html$Html$td,
@@ -7255,7 +7305,22 @@ var author$project$Main$showStats = function (stats) {
 										_List_fromArray(
 											[
 												elm$html$Html$text(
-												elm$core$String$fromInt(stats.atk))
+												elm$core$String$fromFloat(modifier.ownAtk))
+											])),
+										A2(
+										elm$html$Html$td,
+										_List_Nil,
+										_List_fromArray(
+											[
+												elm$html$Html$text('ownDef')
+											])),
+										A2(
+										elm$html$Html$td,
+										_List_Nil,
+										_List_fromArray(
+											[
+												elm$html$Html$text(
+												elm$core$String$fromFloat(modifier.ownDef))
 											]))
 									])),
 								A2(
@@ -7268,7 +7333,7 @@ var author$project$Main$showStats = function (stats) {
 										_List_Nil,
 										_List_fromArray(
 											[
-												elm$html$Html$text('Defense')
+												elm$html$Html$text('ownHP')
 											])),
 										A2(
 										elm$html$Html$td,
@@ -7276,7 +7341,22 @@ var author$project$Main$showStats = function (stats) {
 										_List_fromArray(
 											[
 												elm$html$Html$text(
-												elm$core$String$fromInt(stats.def))
+												elm$core$String$fromFloat(modifier.ownHP))
+											])),
+										A2(
+										elm$html$Html$td,
+										_List_Nil,
+										_List_fromArray(
+											[
+												elm$html$Html$text('ownSpeed')
+											])),
+										A2(
+										elm$html$Html$td,
+										_List_Nil,
+										_List_fromArray(
+											[
+												elm$html$Html$text(
+												elm$core$String$fromFloat(modifier.ownSpeed))
 											]))
 									])),
 								A2(
@@ -7289,7 +7369,7 @@ var author$project$Main$showStats = function (stats) {
 										_List_Nil,
 										_List_fromArray(
 											[
-												elm$html$Html$text('Speed')
+												elm$html$Html$text('pow')
 											])),
 										A2(
 										elm$html$Html$td,
@@ -7297,97 +7377,460 @@ var author$project$Main$showStats = function (stats) {
 										_List_fromArray(
 											[
 												elm$html$Html$text(
-												elm$core$String$fromInt(stats.spd))
-											]))
-									])),
-								A2(
-								elm$html$Html$tr,
-								_List_Nil,
-								_List_fromArray(
-									[
-										A2(
-										elm$html$Html$td,
-										_List_Nil,
-										_List_fromArray(
-											[
-												elm$html$Html$text('Critical Hit Chance')
-											])),
-										A2(
-										elm$html$Html$td,
-										_List_Nil,
-										_List_fromArray(
-											[
-												elm$html$Html$text(
-												elm$core$String$fromFloat(stats.chc * 100) + '%')
-											]))
-									])),
-								A2(
-								elm$html$Html$tr,
-								_List_Nil,
-								_List_fromArray(
-									[
-										A2(
-										elm$html$Html$td,
-										_List_Nil,
-										_List_fromArray(
-											[
-												elm$html$Html$text('Critical Hit Damage')
-											])),
-										A2(
-										elm$html$Html$td,
-										_List_Nil,
-										_List_fromArray(
-											[
-												elm$html$Html$text(
-												elm$core$String$fromFloat(stats.chd * 100) + '%')
-											]))
-									])),
-								A2(
-								elm$html$Html$tr,
-								_List_Nil,
-								_List_fromArray(
-									[
-										A2(
-										elm$html$Html$td,
-										_List_Nil,
-										_List_fromArray(
-											[
-												elm$html$Html$text('Effectiveness')
-											])),
-										A2(
-										elm$html$Html$td,
-										_List_Nil,
-										_List_fromArray(
-											[
-												elm$html$Html$text(
-												elm$core$String$fromFloat(stats.eff * 100) + '%')
-											]))
-									])),
-								A2(
-								elm$html$Html$tr,
-								_List_Nil,
-								_List_fromArray(
-									[
-										A2(
-										elm$html$Html$td,
-										_List_Nil,
-										_List_fromArray(
-											[
-												elm$html$Html$text('Effect Resistance')
-											])),
-										A2(
-										elm$html$Html$td,
-										_List_Nil,
-										_List_fromArray(
-											[
-												elm$html$Html$text(
-												elm$core$String$fromFloat(stats.efr * 100) + '%')
+												elm$core$String$fromFloat(modifier.pow))
 											]))
 									]))
 							]))
 					]))
 			]));
 };
+var elm$core$String$concat = function (strings) {
+	return A2(elm$core$String$join, '', strings);
+};
+var elm$core$List$drop = F2(
+	function (n, list) {
+		drop:
+		while (true) {
+			if (n <= 0) {
+				return list;
+			} else {
+				if (!list.b) {
+					return list;
+				} else {
+					var x = list.a;
+					var xs = list.b;
+					var $temp$n = n - 1,
+						$temp$list = xs;
+					n = $temp$n;
+					list = $temp$list;
+					continue drop;
+				}
+			}
+		}
+	});
+var elm$core$List$head = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return elm$core$Maybe$Just(x);
+	} else {
+		return elm$core$Maybe$Nothing;
+	}
+};
+var elm_community$list_extra$List$Extra$getAt = F2(
+	function (idx, xs) {
+		return (idx < 0) ? elm$core$Maybe$Nothing : elm$core$List$head(
+			A2(elm$core$List$drop, idx, xs));
+	});
+var author$project$Main$createSkillEntity = F3(
+	function (hero_, stats, skillId) {
+		if (hero_.$ === 'Nothing') {
+			return A2(elm$html$Html$div, _List_Nil, _List_Nil);
+		} else {
+			var hero = hero_.a;
+			var skill = function () {
+				var _n1 = A2(elm_community$list_extra$List$Extra$getAt, skillId, hero.skills);
+				if (_n1.$ === 'Just') {
+					var a = _n1.a;
+					return a;
+				} else {
+					return author$project$Main$dummySkill;
+				}
+			}();
+			return A2(
+				elm$html$Html$div,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('box skillbox')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						elm$html$Html$p,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$class('title is-5')
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text(
+								elm$core$String$concat(
+									_List_fromArray(
+										[
+											'Skill ',
+											elm$core$String$fromInt(skillId + 1)
+										])))
+							])),
+						A2(
+						elm$html$Html$table,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$class('table'),
+								elm$html$Html$Attributes$class('table is-narrow is-fullwidth')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								elm$html$Html$td,
+								_List_Nil,
+								_List_fromArray(
+									[
+										A2(
+										elm$html$Html$tr,
+										_List_Nil,
+										_List_fromArray(
+											[
+												A2(
+												elm$html$Html$td,
+												_List_Nil,
+												_List_fromArray(
+													[
+														elm$html$Html$text('Skill Name:')
+													])),
+												A2(
+												elm$html$Html$td,
+												_List_Nil,
+												_List_fromArray(
+													[
+														elm$html$Html$text(skill.name)
+													]))
+											])),
+										A2(
+										elm$html$Html$tr,
+										_List_Nil,
+										_List_fromArray(
+											[
+												A2(
+												elm$html$Html$td,
+												_List_Nil,
+												_List_fromArray(
+													[
+														elm$html$Html$text('Cooldown:')
+													])),
+												A2(
+												elm$html$Html$td,
+												_List_Nil,
+												_List_fromArray(
+													[
+														elm$html$Html$text(
+														elm$core$String$fromInt(skill.cooldown))
+													]))
+											])),
+										A2(
+										elm$html$Html$tr,
+										_List_Nil,
+										_List_fromArray(
+											[
+												A2(
+												elm$html$Html$td,
+												_List_Nil,
+												_List_fromArray(
+													[
+														elm$html$Html$text('isPassive:')
+													])),
+												A2(
+												elm$html$Html$td,
+												_List_Nil,
+												_List_fromArray(
+													[
+														elm$html$Html$text(
+														Chadtech$elm_bool_extra$Bool$Extra$toString(skill.isPassive))
+													]))
+											])),
+										A2(
+										elm$html$Html$tr,
+										_List_Nil,
+										_List_fromArray(
+											[
+												A2(
+												elm$html$Html$td,
+												_List_Nil,
+												_List_fromArray(
+													[
+														elm$html$Html$text('Damage:')
+													])),
+												A2(
+												elm$html$Html$td,
+												_List_Nil,
+												_List_fromArray(
+													[
+														elm$html$Html$text(
+														elm$core$String$fromInt(
+															A2(
+																author$project$Main$calculateDmgOfSkill,
+																stats,
+																author$project$Main$convertSkillToSkillMod(skill))))
+													]))
+											])),
+										A2(
+										elm$html$Html$tr,
+										_List_Nil,
+										_List_fromArray(
+											[
+												A2(
+												elm$html$Html$td,
+												_List_Nil,
+												_List_fromArray(
+													[
+														elm$html$Html$text('Description:')
+													])),
+												A2(
+												elm$html$Html$td,
+												_List_Nil,
+												_List_fromArray(
+													[
+														elm$html$Html$text(
+														A2(elm$core$Maybe$withDefault, '', skill.description))
+													]))
+											]))
+									])),
+								A2(
+								elm$html$Html$td,
+								_List_Nil,
+								_List_fromArray(
+									[
+										author$project$Main$showSkill(
+										author$project$Main$convertSkillToSkillMod(skill))
+									]))
+							]))
+					]));
+		}
+	});
+var author$project$Main$Armor = {$: 'Armor'};
+var author$project$Main$Boots = {$: 'Boots'};
+var author$project$Main$Helmet = {$: 'Helmet'};
+var author$project$Main$Necklace = {$: 'Necklace'};
+var author$project$Main$OpenInput = {$: 'OpenInput'};
+var author$project$Main$OpenModal = F2(
+	function (a, b) {
+		return {$: 'OpenModal', a: a, b: b};
+	});
+var author$project$Main$Ring = {$: 'Ring'};
+var author$project$Main$getItemFromInventory = F2(
+	function (slot_, inventory) {
+		var item = elm$core$List$head(
+			A2(
+				elm$core$List$filter,
+				function (item_) {
+					return _Utils_eq(item_.slot, slot_);
+				},
+				inventory));
+		if (item.$ === 'Just') {
+			var a = item.a;
+			return a;
+		} else {
+			return author$project$Main$initItem(slot_);
+		}
+	});
+var author$project$Main$showStats = F2(
+	function (stats, name) {
+		return A2(
+			elm$html$Html$div,
+			_List_fromArray(
+				[
+					elm$html$Html$Attributes$class('box statsbox flexauto')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					elm$html$Html$p,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$class('title is-5')
+						]),
+					_List_fromArray(
+						[
+							elm$html$Html$text(
+							elm$core$String$concat(
+								_List_fromArray(
+									[name, '-Stats'])))
+						])),
+					A2(
+					elm$html$Html$table,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$class('table'),
+							elm$html$Html$Attributes$class('table is-narrow is-fullwidth')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							elm$html$Html$thead,
+							_List_Nil,
+							_List_fromArray(
+								[
+									A2(
+									elm$html$Html$tr,
+									_List_Nil,
+									_List_fromArray(
+										[
+											A2(
+											elm$html$Html$td,
+											_List_Nil,
+											_List_fromArray(
+												[
+													elm$html$Html$text('Hitpoints')
+												])),
+											A2(
+											elm$html$Html$td,
+											_List_Nil,
+											_List_fromArray(
+												[
+													elm$html$Html$text(
+													elm$core$String$fromInt(stats.hp))
+												]))
+										])),
+									A2(
+									elm$html$Html$tr,
+									_List_Nil,
+									_List_fromArray(
+										[
+											A2(
+											elm$html$Html$td,
+											_List_Nil,
+											_List_fromArray(
+												[
+													elm$html$Html$text('Attack')
+												])),
+											A2(
+											elm$html$Html$td,
+											_List_Nil,
+											_List_fromArray(
+												[
+													elm$html$Html$text(
+													elm$core$String$fromInt(stats.atk))
+												]))
+										])),
+									A2(
+									elm$html$Html$tr,
+									_List_Nil,
+									_List_fromArray(
+										[
+											A2(
+											elm$html$Html$td,
+											_List_Nil,
+											_List_fromArray(
+												[
+													elm$html$Html$text('Defense')
+												])),
+											A2(
+											elm$html$Html$td,
+											_List_Nil,
+											_List_fromArray(
+												[
+													elm$html$Html$text(
+													elm$core$String$fromInt(stats.def))
+												]))
+										])),
+									A2(
+									elm$html$Html$tr,
+									_List_Nil,
+									_List_fromArray(
+										[
+											A2(
+											elm$html$Html$td,
+											_List_Nil,
+											_List_fromArray(
+												[
+													elm$html$Html$text('Speed')
+												])),
+											A2(
+											elm$html$Html$td,
+											_List_Nil,
+											_List_fromArray(
+												[
+													elm$html$Html$text(
+													elm$core$String$fromInt(stats.spd))
+												]))
+										])),
+									A2(
+									elm$html$Html$tr,
+									_List_Nil,
+									_List_fromArray(
+										[
+											A2(
+											elm$html$Html$td,
+											_List_Nil,
+											_List_fromArray(
+												[
+													elm$html$Html$text('Critical Hit Chance')
+												])),
+											A2(
+											elm$html$Html$td,
+											_List_Nil,
+											_List_fromArray(
+												[
+													elm$html$Html$text(
+													elm$core$String$fromFloat(stats.chc * 100) + '%')
+												]))
+										])),
+									A2(
+									elm$html$Html$tr,
+									_List_Nil,
+									_List_fromArray(
+										[
+											A2(
+											elm$html$Html$td,
+											_List_Nil,
+											_List_fromArray(
+												[
+													elm$html$Html$text('Critical Hit Damage')
+												])),
+											A2(
+											elm$html$Html$td,
+											_List_Nil,
+											_List_fromArray(
+												[
+													elm$html$Html$text(
+													elm$core$String$fromFloat(stats.chd * 100) + '%')
+												]))
+										])),
+									A2(
+									elm$html$Html$tr,
+									_List_Nil,
+									_List_fromArray(
+										[
+											A2(
+											elm$html$Html$td,
+											_List_Nil,
+											_List_fromArray(
+												[
+													elm$html$Html$text('Effectiveness')
+												])),
+											A2(
+											elm$html$Html$td,
+											_List_Nil,
+											_List_fromArray(
+												[
+													elm$html$Html$text(
+													elm$core$String$fromFloat(stats.eff * 100) + '%')
+												]))
+										])),
+									A2(
+									elm$html$Html$tr,
+									_List_Nil,
+									_List_fromArray(
+										[
+											A2(
+											elm$html$Html$td,
+											_List_Nil,
+											_List_fromArray(
+												[
+													elm$html$Html$text('Effect Resistance')
+												])),
+											A2(
+											elm$html$Html$td,
+											_List_Nil,
+											_List_fromArray(
+												[
+													elm$html$Html$text(
+													elm$core$String$fromFloat(stats.efr * 100) + '%')
+												]))
+										]))
+								]))
+						]))
+				]));
+	});
 var elm$core$Basics$neq = _Utils_notEqual;
 var elm$html$Html$img = _VirtualDom_node('img');
 var elm$html$Html$Attributes$src = function (url) {
@@ -7431,7 +7874,7 @@ var author$project$Main$image = F3(
 							elm$html$Html$Attributes$class('space')
 						]),
 					_List_Nil),
-					author$project$Main$showStats(stats),
+					A2(author$project$Main$showStats, stats, name),
 					A2(
 					elm$html$Html$div,
 					_List_fromArray(
@@ -8425,7 +8868,10 @@ var author$project$Main$view = function (model) {
 				author$project$Main$viewHeroButton(model),
 				author$project$Main$applicationHeader,
 				A3(author$project$Main$image, model.name, model.simulatedStats, model.items),
-				author$project$Main$viewModal(model)
+				author$project$Main$viewModal(model),
+				A3(author$project$Main$createSkillEntity, model.hero, model.simulatedStats, 0),
+				A3(author$project$Main$createSkillEntity, model.hero, model.simulatedStats, 1),
+				A3(author$project$Main$createSkillEntity, model.hero, model.simulatedStats, 2)
 			]));
 };
 var elm$browser$Browser$External = function (a) {

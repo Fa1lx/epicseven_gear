@@ -11,7 +11,7 @@ import Json.Decode as Decode exposing (Decoder, field, string)
 import List exposing (..)
 import List.Extra
 import Maybe exposing (withDefault)
-import String exposing (toInt, concat)
+import String exposing (concat, toInt)
 import Task
 
 
@@ -301,7 +301,7 @@ type alias SkillModifier =
 
 initSkillMod : SkillModifier
 initSkillMod =
-    SkillModifier 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+    SkillModifier 1.871 0.0 0.0 0.0 0.0 0.0 0.0
 
 
 
@@ -398,7 +398,14 @@ calculateDmgOfSkill heroStats skillMod =
             * skillMod.pow
             * skillMod.defaultMulti
             * (1.0 + toFloat heroStats.spd * skillMod.ownSpeed)
-            * (1.0 + (heroStats.chc / 100.0 * (heroStats.chd - 100.0)))
+            * (1.0
+                + (if heroStats.chc >= 100 then
+                    heroStats.chd - 100.0
+
+                   else
+                    (heroStats.chc / 100.0) * (heroStats.chd - 100.0)
+                  )
+              )
         )
 
 
@@ -459,7 +466,7 @@ indexOf item items =
 showStats : Stats -> String -> Html Msg
 showStats stats name =
     div [ class "box statsbox flexauto" ]
-        [ p [ class "title is-5" ] [ text (concat[name, "-Stats"]) ]
+        [ p [ class "title is-5" ] [ text (concat [ name, "-Stats" ]) ]
         , table [ class "table", class "table is-narrow is-fullwidth" ]
             [ thead []
                 [ tr []
@@ -506,10 +513,10 @@ showSkill modifier =
         , table [ class "table", class "table is-narrow is-fullwidth" ]
             [ thead []
                 [ tr []
-                    [ Html.td [] [ text "dafaultMulti" ]
+                    [ Html.td [] [ text "defaultMulti" ]
                     , Html.td [] [ text (String.fromFloat modifier.defaultMulti) ]
-                    , td [] [text "enemyHP"]
-                    , td [] [text (String.fromFloat modifier.enemyHP)]
+                    , td [] [ text "enemyHP" ]
+                    , td [] [ text (String.fromFloat modifier.enemyHP) ]
                     ]
                 , tr []
                     [ Html.td [] [ text "ownAtk" ]
@@ -535,48 +542,47 @@ showSkill modifier =
 createSkillEntity : Maybe Hero -> Stats -> Int -> Html Msg
 createSkillEntity hero_ stats skillId =
     case hero_ of
-        Nothing -> div[][]
-        Just hero -> 
+        Nothing ->
+            div [] []
+
+        Just hero ->
             let
                 skill =
                     case List.Extra.getAt skillId hero.skills of
                         Just a ->
-                           a
+                            a
 
                         Nothing ->
-                         dummySkill
+                            dummySkill
             in
-                div [ class "box skillbox" ]
-                    [ p [ class "title is-5" ] [ text (concat["Skill ",String.fromInt(skillId+1)]) ]
-                    , table [ class "table", class "table is-narrow is-fullwidth" ]
-                        [td []
-                                    [ tr []
-                                    [ td [] [ text "Skill Name:" ]
-                                        , td [] [ text skill.name ]
-                                    ]
-                                    , tr []
-                                    [ td [] [ text "Cooldown:" ]
-                                        , td [] [ text (String.fromInt skill.cooldown) ]
-                                        ]
-                                    , tr []
-                                    [ td [] [ text "isPassive:" ]
-                                    , td [] [ text (Bool.Extra.toString skill.isPassive) ]
-                                    ]
-                                , tr []
-                                    [ td [] [ text "Damage:" ]
-                                    , td [] [ text (String.fromInt (calculateDmgOfSkill stats (convertSkillToSkillMod skill))) ]
-                                    ]
-                                , tr []
-                                    [ td [] [ text "Description:" ]
+            div [ class "box skillbox" ]
+                [ p [ class "title is-5" ] [ text (concat [ "Skill ", String.fromInt (skillId + 1) ]) ]
+                , table [ class "table", class "table is-narrow is-fullwidth" ]
+                    [ td []
+                        [ tr []
+                            [ td [] [ text "Skill Name:" ]
+                            , td [] [ text skill.name ]
+                            ]
+                        , tr []
+                            [ td [] [ text "Cooldown:" ]
+                            , td [] [ text (String.fromInt skill.cooldown) ]
+                            ]
+                        , tr []
+                            [ td [] [ text "isPassive:" ]
+                            , td [] [ text (Bool.Extra.toString skill.isPassive) ]
+                            ]
+                        , tr []
+                            [ td [] [ text "Damage:" ]
+                            , td [] [ text (String.fromInt (calculateDmgOfSkill stats (convertSkillToSkillMod skill))) ]
+                            ]
+                        , tr []
+                            [ td [] [ text "Description:" ]
                             , td [] [ text (Maybe.withDefault "" skill.description) ]
-                                        ]
-                                ]
-                                , td [] [ showSkill (convertSkillToSkillMod skill) ]
-                                
-                                
-                        
+                            ]
                         ]
+                    , td [] [ showSkill (convertSkillToSkillMod skill) ]
                     ]
+                ]
 
 
 type AddHeroButtonMsg
@@ -879,11 +885,6 @@ inputItem item =
         ]
 
 
-
---, modalFooter
---    [ a [ class "button is-success", onClick CloseModal ] [ text "Form hinzufügen" ] ]
-
-
 viewModal : Model -> Html Msg
 viewModal model =
     case model.modal of
@@ -896,8 +897,6 @@ viewModal model =
                 , case modalState of
                     InputItem item ->
                         inputItem item
-
-                --inputItemInModal string
                 ]
 
 
@@ -939,7 +938,6 @@ ariaControls value =
 
 
 
--- END PHIL FUNs
 -- JSON DECODER
 
 
