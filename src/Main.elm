@@ -456,10 +456,10 @@ indexOf item items =
 -- PHIL FUNs
 
 
-showStats : Stats -> Html Msg
-showStats stats =
+showStats : Stats -> String -> Html Msg
+showStats stats name =
     div [ class "box statsbox flexauto" ]
-        [ p [ class "title is-5" ] [ text "Stats" ]
+        [ p [ class "title is-5" ] [ text (concat[name, "-Stats"]) ]
         , table [ class "table", class "table is-narrow is-fullwidth" ]
             [ thead []
                 [ tr []
@@ -549,9 +549,7 @@ createSkillEntity hero_ stats skillId =
                 div [ class "box skillbox" ]
                     [ p [ class "title is-5" ] [ text (concat["Skill ",String.fromInt(skillId+1)]) ]
                     , table [ class "table", class "table is-narrow is-fullwidth" ]
-                        [ thead [][
-                            td []
-                                [ td []
+                        [td []
                                     [ tr []
                                     [ td [] [ text "Skill Name:" ]
                                         , td [] [ text skill.name ]
@@ -575,8 +573,8 @@ createSkillEntity hero_ stats skillId =
                                 ]
                                 , td [] [ showSkill (convertSkillToSkillMod skill) ]
                                 
-                                ]
-                        ]
+                                
+                        
                         ]
                     ]
 
@@ -657,7 +655,7 @@ image name stats inventory =
     if name /= "" then
         div [ class "flexbox" ]
             [ div [ class "space" ] []
-            , showStats stats
+            , showStats stats name
             , div [ class "space" ] []
             , div [ class "itemimg" ]
                 [ img [ onClick (OpenModal OpenInput (getItemFromInventory Weapon inventory)), src "src/item-images/weapon.png", class "rounded" ] []
