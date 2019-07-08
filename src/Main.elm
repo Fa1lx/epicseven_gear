@@ -399,11 +399,11 @@ calculateDmgOfSkill heroStats skillMod =
             * skillMod.defaultMulti
             * (1.0 + toFloat heroStats.spd * skillMod.ownSpeed)
             * (1.0
-                + (if heroStats.chc >= 100 then
+                + (if heroStats.chc >= 1 then
                     heroStats.chd - 100.0
 
                    else
-                    (heroStats.chc / 100.0) * (heroStats.chd - 100.0)
+                    heroStats.chc * (heroStats.chd - 100.0)
                   )
               )
         )

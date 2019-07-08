@@ -7154,7 +7154,7 @@ var author$project$Main$SkillModifier = F7(
 	function (defaultMulti, pow, ownAtk, ownHP, ownDef, ownSpeed, enemyHP) {
 		return {defaultMulti: defaultMulti, enemyHP: enemyHP, ownAtk: ownAtk, ownDef: ownDef, ownHP: ownHP, ownSpeed: ownSpeed, pow: pow};
 	});
-var author$project$Main$initSkillMod = A7(author$project$Main$SkillModifier, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+var author$project$Main$initSkillMod = A7(author$project$Main$SkillModifier, 1.871, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 var author$project$Main$updateSkillMod = F2(
 	function (modifier, skillMod) {
 		var _n0 = modifier.section;
@@ -7261,7 +7261,7 @@ var author$project$Main$showSkill = function (modifier) {
 										_List_Nil,
 										_List_fromArray(
 											[
-												elm$html$Html$text('dafaultMulti')
+												elm$html$Html$text('defaultMulti')
 											])),
 										A2(
 										elm$html$Html$td,
