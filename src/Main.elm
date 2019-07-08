@@ -129,7 +129,6 @@ view model =
         , applicationHeader
         , image model.name model.simulatedStats model.items
         , viewModal model
-        , div[][]
         , createSkillEntity model.hero model.simulatedStats 0
         , createSkillEntity model.hero model.simulatedStats 1
         , createSkillEntity model.hero model.simulatedStats 2
