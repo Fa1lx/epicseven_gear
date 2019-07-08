@@ -1,5 +1,6 @@
 module Main exposing (main)
 
+import Array
 import Bool.Extra
 import Browser
 import Html exposing (..)
@@ -11,6 +12,7 @@ import List exposing (..)
 import List.Extra
 import Maybe exposing (withDefault)
 import String exposing (toInt)
+import Task
 
 
 
@@ -41,8 +43,8 @@ initialModel _ =
       , addHeroButton = HideButtonMenu
       , imageURL = ""
       , modal = Nothing
-      , newItem = initItem Weapon
-      , currentItem = initItem Weapon
+      , newItem = initItem Dummy
+      , currentItem = initItem Dummy
       }
     , Cmd.none
     )
@@ -94,14 +96,21 @@ update msg model =
             ( { model
                 | modal = Nothing
                 , items =
-                    [ model.newItem ] ++ List.filter (\x -> x.slot /= model.currentItem.slot) model.items
-                , newItem = initItem Weapon
-                , currentItem = initItem Weapon
+                    let
+                        index =
+                            indexOf model.currentItem model.items
+                    in
+                    if index == -1 then
+                        model.items ++ [ model.newItem ]
+
+                    else
+                        Array.toList (Array.set index model.newItem (Array.fromList model.items))
+                , newItem = initItem Dummy
+                , currentItem = initItem Dummy
               }
-            , Cmd.none
+            , Task.succeed UpdateStats |> Task.perform identity
             )
 
-        --, items = "Fun" :: model.items}
         CloseModal ->
             ( { model | modal = Nothing }, Cmd.none )
 
@@ -235,7 +244,7 @@ type Slot
     | Necklace
     | Ring
     | Boots
-    | Artifact
+    | Dummy
 
 
 type Stat
@@ -311,12 +320,6 @@ calculateStats heroStats items =
     let
         cStats =
             List.foldl accumulateStats initCumulativeStats items
-
-        --List.map accumulateStats
-        --to normalize the % values
-        --  ([ initCumulativeStats ]
-        --    ++ items
-        --)
     in
     { heroStats
         | atk = round (toFloat heroStats.atk * (toFloat cStats.atkPercent / 100)) + cStats.atkFlat
@@ -424,8 +427,26 @@ updateInventory : Model -> Model
 updateInventory model =
     { model
         | items =
-            [ model.newItem ] ++ List.filter (\x -> x.slot /= model.currentItem.slot) model.items
+            let
+                index =
+                    indexOf model.currentItem model.items
+            in
+            if index == -1 then
+                model.items ++ [ model.newItem ]
+
+            else
+                Array.toList (Array.set index model.newItem (Array.fromList model.items))
     }
+
+
+indexOf : Item -> List Item -> Int
+indexOf item items =
+    items
+        |> List.indexedMap (\i x -> ( i, x ))
+        |> List.filter (\( idx, item_ ) -> item == item_)
+        |> List.map Tuple.first
+        |> List.minimum
+        |> Maybe.withDefault -1
 
 
 
@@ -577,18 +598,12 @@ applicationTitle =
     "Epic7Seven Gear Calculator"
 
 
-applicationSubTitle : String.String
-applicationSubTitle =
-    "lo2342342l"
-
-
 applicationHeader : Html Msg
 applicationHeader =
     div [ class "hero" ]
         [ div [ class "hero-body" ]
             [ div [ class "container" ]
                 [ h1 [ class "title has-text-white" ] [ text applicationTitle ]
-                , h2 [ class "subtitle" ] [ text applicationSubTitle ]
                 ]
             ]
         ]
@@ -631,26 +646,29 @@ image name stats inventory =
             else
                 ""
     in
-    if name /= "" then 
-    div [ class "flexbox" ]
-        [ div [ class "space" ] []
-        , showStats stats
-        , div [ class "space" ] []
-        , div [ class "itemimg" ]
-            [ img [ onClick (OpenModal OpenInput (getItemFromInventory Weapon inventory)), src "src/item-images/weapon.png", class "rounded" ] []
-            , img [ onClick (OpenModal OpenInput (getItemFromInventory Helmet inventory)), src "src/item-images/helmet.png", class "rounded" ] []
-            , img [ onClick (OpenModal OpenInput (getItemFromInventory Armor inventory)), src "src/item-images/armor.png", class "rounded" ] []
+    if name /= "" then
+        div [ class "flexbox" ]
+            [ div [ class "space" ] []
+            , showStats stats
+            , div [ class "space" ] []
+            , div [ class "itemimg" ]
+                [ img [ onClick (OpenModal OpenInput (getItemFromInventory Weapon inventory)), src "src/item-images/weapon.png", class "rounded" ] []
+                , img [ onClick (OpenModal OpenInput (getItemFromInventory Helmet inventory)), src "src/item-images/helmet.png", class "rounded" ] []
+                , img [ onClick (OpenModal OpenInput (getItemFromInventory Armor inventory)), src "src/item-images/armor.png", class "rounded" ] []
+                ]
+            , img
+                [ src imageurl, class "heroimg" ]
+                []
+            , div [ class "flexauto itemimg" ]
+                [ img [ onClick (OpenModal OpenInput (getItemFromInventory Necklace inventory)), src "src/item-images/necklace.png", class "rounded" ] []
+                , img [ onClick (OpenModal OpenInput (getItemFromInventory Ring inventory)), src "src/item-images/ring.png", class "rounded" ] []
+                , img [ onClick (OpenModal OpenInput (getItemFromInventory Boots inventory)), src "src/item-images/boots.png", class "rounded" ] []
+                ]
+            , div [ class "space" ] []
             ]
-        , img
-            [ src imageurl, class "heroimg" ] []
-        , div [ class "flexauto itemimg" ]
-            [ img [ onClick (OpenModal OpenInput (getItemFromInventory Necklace inventory)), src "src/item-images/necklace.png", class "rounded" ] []
-            , img [ onClick (OpenModal OpenInput (getItemFromInventory Ring inventory)), src "src/item-images/ring.png", class "rounded" ] []
-            , img [ onClick (OpenModal OpenInput (getItemFromInventory Boots inventory)), src "src/item-images/boots.png", class "rounded" ] []
-            ]
-        , div [ class "space" ] []
-        ]
-    else div[][img [src "https://static.smilegatemegaport.com/event/live/epic7/world/brand/images/common/img_share_630.jpg", class "openimage"][]]
+
+    else
+        div [] [ img [ src "https://static.smilegatemegaport.com/event/live/epic7/world/brand/images/common/img_share_630.jpg", class "openimage" ] [] ]
 
 
 viewHeroButton : Model -> Html Msg
@@ -739,7 +757,7 @@ updateModal : ModalMsg -> Item -> Model -> Model
 updateModal modalMsg item model =
     case modalMsg of
         OpenInput ->
-            { model | modal = Just (InputItem item) }
+            { model | modal = Just (InputItem item), currentItem = item }
 
         Change ->
             { model | modal = Just (InputItem item), newItem = item }

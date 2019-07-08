@@ -2489,6 +2489,43 @@ function _Http_track(router, xhr, tracker)
 }
 
 
+var _Bitwise_and = F2(function(a, b)
+{
+	return a & b;
+});
+
+var _Bitwise_or = F2(function(a, b)
+{
+	return a | b;
+});
+
+var _Bitwise_xor = F2(function(a, b)
+{
+	return a ^ b;
+});
+
+function _Bitwise_complement(a)
+{
+	return ~a;
+};
+
+var _Bitwise_shiftLeftBy = F2(function(offset, a)
+{
+	return a << offset;
+});
+
+var _Bitwise_shiftRightBy = F2(function(offset, a)
+{
+	return a >> offset;
+});
+
+var _Bitwise_shiftRightZfBy = F2(function(offset, a)
+{
+	return a >>> offset;
+});
+
+
+
 
 // HELPERS
 
@@ -4047,43 +4084,6 @@ function _VirtualDom_dekey(keyedNode)
 
 
 
-var _Bitwise_and = F2(function(a, b)
-{
-	return a & b;
-});
-
-var _Bitwise_or = F2(function(a, b)
-{
-	return a | b;
-});
-
-var _Bitwise_xor = F2(function(a, b)
-{
-	return a ^ b;
-});
-
-function _Bitwise_complement(a)
-{
-	return ~a;
-};
-
-var _Bitwise_shiftLeftBy = F2(function(offset, a)
-{
-	return a << offset;
-});
-
-var _Bitwise_shiftRightBy = F2(function(offset, a)
-{
-	return a >> offset;
-});
-
-var _Bitwise_shiftRightZfBy = F2(function(offset, a)
-{
-	return a >>> offset;
-});
-
-
-
 
 // HELPERS
 
@@ -5045,8 +5045,8 @@ function _Browser_load(url)
 		}
 	}));
 }
+var author$project$Main$Dummy = {$: 'Dummy'};
 var author$project$Main$HideButtonMenu = {$: 'HideButtonMenu'};
-var author$project$Main$Weapon = {$: 'Weapon'};
 var author$project$Main$Item = function (slot) {
 	return function (atkFlat) {
 		return function (atkPercent) {
@@ -5562,13 +5562,13 @@ var author$project$Main$initialModel = function (_n0) {
 		{
 			addHeroButton: author$project$Main$HideButtonMenu,
 			baseStats: author$project$Main$initStats,
-			currentItem: author$project$Main$initItem(author$project$Main$Weapon),
+			currentItem: author$project$Main$initItem(author$project$Main$Dummy),
 			hero: elm$core$Maybe$Nothing,
 			imageURL: '',
 			items: _List_Nil,
 			modal: elm$core$Maybe$Nothing,
 			name: '',
-			newItem: author$project$Main$initItem(author$project$Main$Weapon),
+			newItem: author$project$Main$initItem(author$project$Main$Dummy),
 			simulatedStats: author$project$Main$initStats
 		},
 		elm$core$Platform$Cmd$none);
@@ -5578,12 +5578,14 @@ var elm$core$Platform$Sub$none = elm$core$Platform$Sub$batch(_List_Nil);
 var author$project$Main$subscriptions = function (model) {
 	return elm$core$Platform$Sub$none;
 };
+var author$project$Main$UpdateStats = {$: 'UpdateStats'};
 var author$project$Main$accumulateStats = F2(
 	function (aStat, bStat) {
 		return _Utils_update(
 			aStat,
 			{atkFlat: aStat.atkFlat + bStat.atkFlat, atkPercent: aStat.atkPercent + bStat.atkPercent, chc: aStat.chc + bStat.chc, chd: aStat.chd + bStat.chd, defFlat: aStat.defFlat + bStat.defFlat, defPercent: aStat.defPercent + bStat.defPercent, eff: aStat.eff + bStat.eff, efr: aStat.efr + bStat.efr, hpFlat: aStat.hpFlat + bStat.hpFlat, hpPercent: aStat.hpPercent + bStat.hpPercent, spd: aStat.spd + bStat.spd});
 	});
+var author$project$Main$Weapon = {$: 'Weapon'};
 var author$project$Main$initCumulativeStats = author$project$Main$Item(author$project$Main$Weapon)(0)(100)(0)(100)(0)(100)(0)(0)(0)(0)(0);
 var elm$core$Basics$round = _Basics_round;
 var author$project$Main$calculateStats = F2(
@@ -6737,6 +6739,81 @@ var author$project$Main$heroLoader = function (source) {
 			url: source
 		});
 };
+var elm$core$Basics$negate = function (n) {
+	return -n;
+};
+var elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2(elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
+var elm$core$List$map = F2(
+	function (f, xs) {
+		return A3(
+			elm$core$List$foldr,
+			F2(
+				function (x, acc) {
+					return A2(
+						elm$core$List$cons,
+						f(x),
+						acc);
+				}),
+			_List_Nil,
+			xs);
+	});
+var elm$core$Basics$min = F2(
+	function (x, y) {
+		return (_Utils_cmp(x, y) < 0) ? x : y;
+	});
+var elm$core$List$minimum = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return elm$core$Maybe$Just(
+			A3(elm$core$List$foldl, elm$core$Basics$min, x, xs));
+	} else {
+		return elm$core$Maybe$Nothing;
+	}
+};
+var elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
+var author$project$Main$indexOf = F2(
+	function (item, items) {
+		return A2(
+			elm$core$Maybe$withDefault,
+			-1,
+			elm$core$List$minimum(
+				A2(
+					elm$core$List$map,
+					elm$core$Tuple$first,
+					A2(
+						elm$core$List$filter,
+						function (_n0) {
+							var idx = _n0.a;
+							var item_ = _n0.b;
+							return _Utils_eq(item, item_);
+						},
+						A2(
+							elm$core$List$indexedMap,
+							F2(
+								function (i, x) {
+									return _Utils_Tuple2(i, x);
+								}),
+							items)))));
+	});
 var author$project$Main$ShowButtonMenu = {$: 'ShowButtonMenu'};
 var author$project$Main$updateAddHeroButton = F2(
 	function (addHeroButtonMsg, model) {
@@ -6759,6 +6836,7 @@ var author$project$Main$updateModal = F3(
 			return _Utils_update(
 				model,
 				{
+					currentItem: item,
 					modal: elm$core$Maybe$Just(
 						author$project$Main$InputItem(item))
 				});
@@ -6772,17 +6850,146 @@ var author$project$Main$updateModal = F3(
 				});
 		}
 	});
-var elm$core$Basics$neq = _Utils_notEqual;
-var elm$core$List$filter = F2(
-	function (isGood, list) {
-		return A3(
-			elm$core$List$foldr,
-			F2(
-				function (x, xs) {
-					return isGood(x) ? A2(elm$core$List$cons, x, xs) : xs;
-				}),
-			_List_Nil,
-			list);
+var elm$core$Array$fromListHelp = F3(
+	function (list, nodeList, nodeListSize) {
+		fromListHelp:
+		while (true) {
+			var _n0 = A2(elm$core$Elm$JsArray$initializeFromList, elm$core$Array$branchFactor, list);
+			var jsArray = _n0.a;
+			var remainingItems = _n0.b;
+			if (_Utils_cmp(
+				elm$core$Elm$JsArray$length(jsArray),
+				elm$core$Array$branchFactor) < 0) {
+				return A2(
+					elm$core$Array$builderToArray,
+					true,
+					{nodeList: nodeList, nodeListSize: nodeListSize, tail: jsArray});
+			} else {
+				var $temp$list = remainingItems,
+					$temp$nodeList = A2(
+					elm$core$List$cons,
+					elm$core$Array$Leaf(jsArray),
+					nodeList),
+					$temp$nodeListSize = nodeListSize + 1;
+				list = $temp$list;
+				nodeList = $temp$nodeList;
+				nodeListSize = $temp$nodeListSize;
+				continue fromListHelp;
+			}
+		}
+	});
+var elm$core$Array$fromList = function (list) {
+	if (!list.b) {
+		return elm$core$Array$empty;
+	} else {
+		return A3(elm$core$Array$fromListHelp, list, _List_Nil, 0);
+	}
+};
+var elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
+var elm$core$Array$bitMask = 4294967295 >>> (32 - elm$core$Array$shiftStep);
+var elm$core$Bitwise$and = _Bitwise_and;
+var elm$core$Elm$JsArray$unsafeGet = _JsArray_unsafeGet;
+var elm$core$Elm$JsArray$unsafeSet = _JsArray_unsafeSet;
+var elm$core$Array$setHelp = F4(
+	function (shift, index, value, tree) {
+		var pos = elm$core$Array$bitMask & (index >>> shift);
+		var _n0 = A2(elm$core$Elm$JsArray$unsafeGet, pos, tree);
+		if (_n0.$ === 'SubTree') {
+			var subTree = _n0.a;
+			var newSub = A4(elm$core$Array$setHelp, shift - elm$core$Array$shiftStep, index, value, subTree);
+			return A3(
+				elm$core$Elm$JsArray$unsafeSet,
+				pos,
+				elm$core$Array$SubTree(newSub),
+				tree);
+		} else {
+			var values = _n0.a;
+			var newLeaf = A3(elm$core$Elm$JsArray$unsafeSet, elm$core$Array$bitMask & index, value, values);
+			return A3(
+				elm$core$Elm$JsArray$unsafeSet,
+				pos,
+				elm$core$Array$Leaf(newLeaf),
+				tree);
+		}
+	});
+var elm$core$Bitwise$shiftLeftBy = _Bitwise_shiftLeftBy;
+var elm$core$Array$tailIndex = function (len) {
+	return (len >>> 5) << 5;
+};
+var elm$core$Basics$ge = _Utils_ge;
+var elm$core$Array$set = F3(
+	function (index, value, array) {
+		var len = array.a;
+		var startShift = array.b;
+		var tree = array.c;
+		var tail = array.d;
+		return ((index < 0) || (_Utils_cmp(index, len) > -1)) ? array : ((_Utils_cmp(
+			index,
+			elm$core$Array$tailIndex(len)) > -1) ? A4(
+			elm$core$Array$Array_elm_builtin,
+			len,
+			startShift,
+			tree,
+			A3(elm$core$Elm$JsArray$unsafeSet, elm$core$Array$bitMask & index, value, tail)) : A4(
+			elm$core$Array$Array_elm_builtin,
+			len,
+			startShift,
+			A4(elm$core$Array$setHelp, startShift, index, value, tree),
+			tail));
+	});
+var elm$core$Task$Perform = function (a) {
+	return {$: 'Perform', a: a};
+};
+var elm$core$Task$init = elm$core$Task$succeed(_Utils_Tuple0);
+var elm$core$Task$map = F2(
+	function (func, taskA) {
+		return A2(
+			elm$core$Task$andThen,
+			function (a) {
+				return elm$core$Task$succeed(
+					func(a));
+			},
+			taskA);
+	});
+var elm$core$Task$spawnCmd = F2(
+	function (router, _n0) {
+		var task = _n0.a;
+		return _Scheduler_spawn(
+			A2(
+				elm$core$Task$andThen,
+				elm$core$Platform$sendToApp(router),
+				task));
+	});
+var elm$core$Task$onEffects = F3(
+	function (router, commands, state) {
+		return A2(
+			elm$core$Task$map,
+			function (_n0) {
+				return _Utils_Tuple0;
+			},
+			elm$core$Task$sequence(
+				A2(
+					elm$core$List$map,
+					elm$core$Task$spawnCmd(router),
+					commands)));
+	});
+var elm$core$Task$onSelfMsg = F3(
+	function (_n0, _n1, _n2) {
+		return elm$core$Task$succeed(_Utils_Tuple0);
+	});
+var elm$core$Task$cmdMap = F2(
+	function (tagger, _n0) {
+		var task = _n0.a;
+		return elm$core$Task$Perform(
+			A2(elm$core$Task$map, tagger, task));
+	});
+_Platform_effectManagers['Task'] = _Platform_createManager(elm$core$Task$init, elm$core$Task$onEffects, elm$core$Task$onSelfMsg, elm$core$Task$cmdMap);
+var elm$core$Task$command = _Platform_leaf('Task');
+var elm$core$Task$perform = F2(
+	function (toMessage, task) {
+		return elm$core$Task$command(
+			elm$core$Task$Perform(
+				A2(elm$core$Task$map, toMessage, task)));
 	});
 var author$project$Main$update = F2(
 	function (msg, model) {
@@ -6835,31 +7042,43 @@ var author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
-							currentItem: author$project$Main$initItem(author$project$Main$Weapon),
-							items: _Utils_ap(
-								_List_fromArray(
-									[model.newItem]),
-								A2(
-									elm$core$List$filter,
-									function (x) {
-										return !_Utils_eq(x.slot, model.currentItem.slot);
-									},
-									model.items)),
+							currentItem: author$project$Main$initItem(author$project$Main$Dummy),
+							items: function () {
+								var index = A2(author$project$Main$indexOf, model.currentItem, model.items);
+								return _Utils_eq(index, -1) ? _Utils_ap(
+									model.items,
+									_List_fromArray(
+										[model.newItem])) : elm$core$Array$toList(
+									A3(
+										elm$core$Array$set,
+										index,
+										model.newItem,
+										elm$core$Array$fromList(model.items)));
+							}(),
 							modal: elm$core$Maybe$Nothing,
-							newItem: author$project$Main$initItem(author$project$Main$Weapon),
-							simulatedStats: A2(author$project$Main$calculateStats, model.baseStats, model.items)
+							newItem: author$project$Main$initItem(author$project$Main$Dummy)
 						}),
-					elm$core$Platform$Cmd$none);
-			default:
+					A2(
+						elm$core$Task$perform,
+						elm$core$Basics$identity,
+						elm$core$Task$succeed(author$project$Main$UpdateStats)));
+			case 'CloseModal':
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{modal: elm$core$Maybe$Nothing}),
 					elm$core$Platform$Cmd$none);
+			default:
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							simulatedStats: A2(author$project$Main$calculateStats, model.baseStats, model.items)
+						}),
+					elm$core$Platform$Cmd$none);
 		}
 	});
-var author$project$Main$applicationSubTitle = 'lo2342342l';
-var author$project$Main$applicationTitle = 'Epic7Seven Gear Calculator123';
+var author$project$Main$applicationTitle = 'Epic7Seven Gear Calculator';
 var elm$json$Json$Decode$map2 = _Json_map2;
 var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 	switch (handler.$) {
@@ -6875,7 +7094,6 @@ var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 };
 var elm$html$Html$div = _VirtualDom_node('div');
 var elm$html$Html$h1 = _VirtualDom_node('h1');
-var elm$html$Html$h2 = _VirtualDom_node('h2');
 var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
 var elm$json$Json$Encode$string = _Json_wrap;
@@ -6915,21 +7133,11 @@ var author$project$Main$applicationHeader = A2(
 							elm$html$Html$h1,
 							_List_fromArray(
 								[
-									elm$html$Html$Attributes$class('title')
+									elm$html$Html$Attributes$class('title has-text-white')
 								]),
 							_List_fromArray(
 								[
 									elm$html$Html$text(author$project$Main$applicationTitle)
-								])),
-							A2(
-							elm$html$Html$h2,
-							_List_fromArray(
-								[
-									elm$html$Html$Attributes$class('subtitle')
-								]),
-							_List_fromArray(
-								[
-									elm$html$Html$text(author$project$Main$applicationSubTitle)
 								]))
 						]))
 				]))
@@ -7180,6 +7388,7 @@ var author$project$Main$showStats = function (stats) {
 					]))
 			]));
 };
+var elm$core$Basics$neq = _Utils_notEqual;
 var elm$html$Html$img = _VirtualDom_node('img');
 var elm$html$Html$Attributes$src = function (url) {
 	return A2(
@@ -7207,7 +7416,7 @@ var elm$html$Html$Events$onClick = function (msg) {
 var author$project$Main$image = F3(
 	function (name, stats, inventory) {
 		var imageurl = (name === 'Charles') ? 'src/hero_images/charles.jpg' : ((name === 'Bellona') ? 'src/hero_images/bellona.jpg' : ((name === 'Challenger Dominiel') ? 'src/hero_images/challenger-dominiel.jpg' : ((name === 'Martial Artist Ken') ? 'src/hero_images/martial-artist-ken.jpg' : ((name === 'Yufine') ? 'src/hero_images/yufine.jpg' : ((name === 'Sez') ? 'src/hero_images/sez.jpg' : ((name === 'Haste') ? 'src/hero_images/haste.jpg' : ((name === 'Baal&Sezan') ? 'src/hero_images/baal-sezan.jpg' : ((name === 'Karin') ? 'src/hero_images/Karin.jpg' : ((name === 'Vildred') ? 'src/hero_images/vildred.jpg' : '')))))))));
-		return A2(
+		return (name !== '') ? A2(
 			elm$html$Html$div,
 			_List_fromArray(
 				[
@@ -7222,7 +7431,7 @@ var author$project$Main$image = F3(
 							elm$html$Html$Attributes$class('space')
 						]),
 					_List_Nil),
-					(name !== '') ? author$project$Main$showStats(stats) : A2(elm$html$Html$div, _List_Nil, _List_Nil),
+					author$project$Main$showStats(stats),
 					A2(
 					elm$html$Html$div,
 					_List_fromArray(
@@ -7247,7 +7456,7 @@ var author$project$Main$image = F3(
 										author$project$Main$OpenModal,
 										author$project$Main$OpenInput,
 										A2(author$project$Main$getItemFromInventory, author$project$Main$Weapon, inventory))),
-									elm$html$Html$Attributes$src(imageurl),
+									elm$html$Html$Attributes$src('src/item-images/weapon.png'),
 									elm$html$Html$Attributes$class('rounded')
 								]),
 							_List_Nil),
@@ -7260,7 +7469,7 @@ var author$project$Main$image = F3(
 										author$project$Main$OpenModal,
 										author$project$Main$OpenInput,
 										A2(author$project$Main$getItemFromInventory, author$project$Main$Helmet, inventory))),
-									elm$html$Html$Attributes$src(imageurl),
+									elm$html$Html$Attributes$src('src/item-images/helmet.png'),
 									elm$html$Html$Attributes$class('rounded')
 								]),
 							_List_Nil),
@@ -7273,19 +7482,19 @@ var author$project$Main$image = F3(
 										author$project$Main$OpenModal,
 										author$project$Main$OpenInput,
 										A2(author$project$Main$getItemFromInventory, author$project$Main$Armor, inventory))),
-									elm$html$Html$Attributes$src(imageurl),
+									elm$html$Html$Attributes$src('src/item-images/armor.png'),
 									elm$html$Html$Attributes$class('rounded')
 								]),
 							_List_Nil)
 						])),
-					(imageurl !== '') ? A2(
+					A2(
 					elm$html$Html$img,
 					_List_fromArray(
 						[
 							elm$html$Html$Attributes$src(imageurl),
 							elm$html$Html$Attributes$class('heroimg')
 						]),
-					_List_Nil) : A2(elm$html$Html$div, _List_Nil, _List_Nil),
+					_List_Nil),
 					A2(
 					elm$html$Html$div,
 					_List_fromArray(
@@ -7303,7 +7512,7 @@ var author$project$Main$image = F3(
 										author$project$Main$OpenModal,
 										author$project$Main$OpenInput,
 										A2(author$project$Main$getItemFromInventory, author$project$Main$Necklace, inventory))),
-									elm$html$Html$Attributes$src(imageurl),
+									elm$html$Html$Attributes$src('src/item-images/necklace.png'),
 									elm$html$Html$Attributes$class('rounded')
 								]),
 							_List_Nil),
@@ -7316,7 +7525,7 @@ var author$project$Main$image = F3(
 										author$project$Main$OpenModal,
 										author$project$Main$OpenInput,
 										A2(author$project$Main$getItemFromInventory, author$project$Main$Ring, inventory))),
-									elm$html$Html$Attributes$src(imageurl),
+									elm$html$Html$Attributes$src('src/item-images/ring.png'),
 									elm$html$Html$Attributes$class('rounded')
 								]),
 							_List_Nil),
@@ -7329,7 +7538,7 @@ var author$project$Main$image = F3(
 										author$project$Main$OpenModal,
 										author$project$Main$OpenInput,
 										A2(author$project$Main$getItemFromInventory, author$project$Main$Boots, inventory))),
-									elm$html$Html$Attributes$src(imageurl),
+									elm$html$Html$Attributes$src('src/item-images/boots.png'),
 									elm$html$Html$Attributes$class('rounded')
 								]),
 							_List_Nil)
@@ -7339,6 +7548,19 @@ var author$project$Main$image = F3(
 					_List_fromArray(
 						[
 							elm$html$Html$Attributes$class('space')
+						]),
+					_List_Nil)
+				])) : A2(
+			elm$html$Html$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					A2(
+					elm$html$Html$img,
+					_List_fromArray(
+						[
+							elm$html$Html$Attributes$src('https://static.smilegatemegaport.com/event/live/epic7/world/brand/images/common/img_share_630.jpg'),
+							elm$html$Html$Attributes$class('openimage')
 						]),
 					_List_Nil)
 				]));
@@ -7459,7 +7681,7 @@ var author$project$Main$viewHeroButton = function (model) {
 								elm$html$Html$button,
 								_List_fromArray(
 									[
-										elm$html$Html$Attributes$class('button  is-info is-large is-rounded'),
+										elm$html$Html$Attributes$class('button  is-black is-large is-rounded'),
 										author$project$Main$ariaHaspopup('true'),
 										author$project$Main$ariaControls('dropdown-menu3')
 									]),
@@ -7596,15 +7818,6 @@ var author$project$Main$modalHeader = function (title) {
 				_List_Nil)
 			]));
 };
-var elm$core$Maybe$withDefault = F2(
-	function (_default, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return value;
-		} else {
-			return _default;
-		}
-	});
 var elm$core$String$toInt = _String_toInt;
 var elm$html$Html$fieldset = _VirtualDom_node('fieldset');
 var elm$html$Html$input = _VirtualDom_node('input');
@@ -8233,74 +8446,6 @@ var elm$core$Basics$never = function (_n0) {
 		continue never;
 	}
 };
-var elm$core$Task$Perform = function (a) {
-	return {$: 'Perform', a: a};
-};
-var elm$core$Task$init = elm$core$Task$succeed(_Utils_Tuple0);
-var elm$core$List$map = F2(
-	function (f, xs) {
-		return A3(
-			elm$core$List$foldr,
-			F2(
-				function (x, acc) {
-					return A2(
-						elm$core$List$cons,
-						f(x),
-						acc);
-				}),
-			_List_Nil,
-			xs);
-	});
-var elm$core$Task$map = F2(
-	function (func, taskA) {
-		return A2(
-			elm$core$Task$andThen,
-			function (a) {
-				return elm$core$Task$succeed(
-					func(a));
-			},
-			taskA);
-	});
-var elm$core$Task$spawnCmd = F2(
-	function (router, _n0) {
-		var task = _n0.a;
-		return _Scheduler_spawn(
-			A2(
-				elm$core$Task$andThen,
-				elm$core$Platform$sendToApp(router),
-				task));
-	});
-var elm$core$Task$onEffects = F3(
-	function (router, commands, state) {
-		return A2(
-			elm$core$Task$map,
-			function (_n0) {
-				return _Utils_Tuple0;
-			},
-			elm$core$Task$sequence(
-				A2(
-					elm$core$List$map,
-					elm$core$Task$spawnCmd(router),
-					commands)));
-	});
-var elm$core$Task$onSelfMsg = F3(
-	function (_n0, _n1, _n2) {
-		return elm$core$Task$succeed(_Utils_Tuple0);
-	});
-var elm$core$Task$cmdMap = F2(
-	function (tagger, _n0) {
-		var task = _n0.a;
-		return elm$core$Task$Perform(
-			A2(elm$core$Task$map, tagger, task));
-	});
-_Platform_effectManagers['Task'] = _Platform_createManager(elm$core$Task$init, elm$core$Task$onEffects, elm$core$Task$onSelfMsg, elm$core$Task$cmdMap);
-var elm$core$Task$command = _Platform_leaf('Task');
-var elm$core$Task$perform = F2(
-	function (toMessage, task) {
-		return elm$core$Task$command(
-			elm$core$Task$Perform(
-				A2(elm$core$Task$map, toMessage, task)));
-	});
 var elm$browser$Debugger$Expando$ArraySeq = {$: 'ArraySeq'};
 var elm$browser$Debugger$Expando$Constructor = F3(
 	function (a, b, c) {
@@ -9031,9 +9176,6 @@ var elm$core$String$left = F2(
 		return (n < 1) ? '' : A3(elm$core$String$slice, 0, n, string);
 	});
 var elm$core$String$length = _String_length;
-var elm$core$Basics$negate = function (n) {
-	return -n;
-};
 var elm$core$String$right = F2(
 	function (n, string) {
 		return (n < 1) ? '' : A3(
@@ -10667,41 +10809,6 @@ var elm$browser$Debugger$History$Snapshot = F2(
 	function (model, messages) {
 		return {messages: messages, model: model};
 	});
-var elm$core$Array$fromListHelp = F3(
-	function (list, nodeList, nodeListSize) {
-		fromListHelp:
-		while (true) {
-			var _n0 = A2(elm$core$Elm$JsArray$initializeFromList, elm$core$Array$branchFactor, list);
-			var jsArray = _n0.a;
-			var remainingItems = _n0.b;
-			if (_Utils_cmp(
-				elm$core$Elm$JsArray$length(jsArray),
-				elm$core$Array$branchFactor) < 0) {
-				return A2(
-					elm$core$Array$builderToArray,
-					true,
-					{nodeList: nodeList, nodeListSize: nodeListSize, tail: jsArray});
-			} else {
-				var $temp$list = remainingItems,
-					$temp$nodeList = A2(
-					elm$core$List$cons,
-					elm$core$Array$Leaf(jsArray),
-					nodeList),
-					$temp$nodeListSize = nodeListSize + 1;
-				list = $temp$list;
-				nodeList = $temp$nodeList;
-				nodeListSize = $temp$nodeListSize;
-				continue fromListHelp;
-			}
-		}
-	});
-var elm$core$Array$fromList = function (list) {
-	if (!list.b) {
-		return elm$core$Array$empty;
-	} else {
-		return A3(elm$core$Array$fromListHelp, list, _List_Nil, 0);
-	}
-};
 var elm$browser$Debugger$History$addRecent = F3(
 	function (msg, newModel, _n0) {
 		var model = _n0.model;
@@ -10726,14 +10833,8 @@ var elm$browser$Debugger$History$addRecent = F3(
 				A2(elm$core$List$cons, msg, messages),
 				numMessages + 1));
 	});
-var elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
-var elm$core$Array$bitMask = 4294967295 >>> (32 - elm$core$Array$shiftStep);
-var elm$core$Basics$ge = _Utils_ge;
-var elm$core$Bitwise$and = _Bitwise_and;
 var elm$core$Elm$JsArray$push = _JsArray_push;
 var elm$core$Elm$JsArray$singleton = _JsArray_singleton;
-var elm$core$Elm$JsArray$unsafeGet = _JsArray_unsafeGet;
-var elm$core$Elm$JsArray$unsafeSet = _JsArray_unsafeSet;
 var elm$core$Array$insertTailInTree = F4(
 	function (shift, index, tail, tree) {
 		var pos = elm$core$Array$bitMask & (index >>> shift);
@@ -10769,7 +10870,6 @@ var elm$core$Array$insertTailInTree = F4(
 			}
 		}
 	});
-var elm$core$Bitwise$shiftLeftBy = _Bitwise_shiftLeftBy;
 var elm$core$Array$unsafeReplaceTail = F2(
 	function (newTail, _n0) {
 		var len = _n0.a;
@@ -10890,9 +10990,6 @@ var elm$core$Array$getHelp = F3(
 			}
 		}
 	});
-var elm$core$Array$tailIndex = function (len) {
-	return (len >>> 5) << 5;
-};
 var elm$core$Array$get = F2(
 	function (index, _n0) {
 		var len = _n0.a;
@@ -11812,4 +11909,4 @@ var elm$browser$Browser$element = _Browser_element;
 var author$project$Main$main = elm$browser$Browser$element(
 	{init: author$project$Main$initialModel, subscriptions: author$project$Main$subscriptions, update: author$project$Main$update, view: author$project$Main$view});
 _Platform_export({'Main':{'init':author$project$Main$main(
-	elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.0"},"types":{"message":"Main.Msg","aliases":{"Main.Hero":{"args":[],"type":"{ name : String.String, rarity : Basics.Int, element : String.String, stats : Main.Stats, skills : List.List Main.Skill }"},"Main.Item":{"args":[],"type":"{ slot : Main.Slot, atkFlat : Basics.Int, atkPercent : Basics.Int, hpFlat : Basics.Int, hpPercent : Basics.Int, defFlat : Basics.Int, defPercent : Basics.Int, chc : Basics.Int, chd : Basics.Int, eff : Basics.Int, efr : Basics.Int, spd : Basics.Int }"},"Main.Modifier":{"args":[],"type":"{ category : Maybe.Maybe Main.Stat, target : Maybe.Maybe Main.Origin, section : Main.Section, value : Basics.Float, soulburn : Basics.Float }"},"Main.Skill":{"args":[],"type":"{ isPassive : Basics.Bool, soulburn : Basics.Int, soulburnEffect : Maybe.Maybe String.String, cooldown : Basics.Int, name : String.String, description : Maybe.Maybe String.String, modifiers : List.List Main.Modifier }"},"Main.Stats":{"args":[],"type":"{ atk : Basics.Int, hp : Basics.Int, spd : Basics.Int, def : Basics.Int, chc : Basics.Float, chd : Basics.Float, eff : Basics.Float, efr : Basics.Float }"}},"unions":{"Main.Msg":{"args":[],"tags":{"Loading":["String.String"],"GotHero":["Result.Result Http.Error Main.Hero"],"AddHeroButton":["Main.AddHeroButtonMsg"],"CloseModal":[],"HeroClicked":["String.String","Main.AddHeroButtonMsg"],"OpenModal":["Main.ModalMsg","Main.Item"],"Add":[]}},"Main.AddHeroButtonMsg":{"args":[],"tags":{"HideAddHeroDropdownMenu":[],"ShowAddHeroDropdownMenu":[]}},"Main.ModalMsg":{"args":[],"tags":{"OpenInput":[],"Change":[]}},"Main.Origin":{"args":[],"tags":{"Self":[],"Target":[]}},"Main.Section":{"args":[],"tags":{"Additive":[],"Multiplicative":[],"Pow":[]}},"Main.Slot":{"args":[],"tags":{"Weapon":[],"Helmet":[],"Armor":[],"Necklace":[],"Ring":[],"Boots":[],"Artifact":[]}},"Main.Stat":{"args":[],"tags":{"Atk":[],"AtkPercent":[],"HP":[],"HPPercent":[],"Def":[],"DefPercent":[],"ChC":[],"ChD":[],"Eff":[],"EfR":[],"Speed":[]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Basics.Float":{"args":[],"tags":{"Float":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}}}}})}});}(this));
+	elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.0"},"types":{"message":"Main.Msg","aliases":{"Main.Hero":{"args":[],"type":"{ name : String.String, rarity : Basics.Int, element : String.String, stats : Main.Stats, skills : List.List Main.Skill }"},"Main.Item":{"args":[],"type":"{ slot : Main.Slot, atkFlat : Basics.Int, atkPercent : Basics.Int, hpFlat : Basics.Int, hpPercent : Basics.Int, defFlat : Basics.Int, defPercent : Basics.Int, chc : Basics.Int, chd : Basics.Int, eff : Basics.Int, efr : Basics.Int, spd : Basics.Int }"},"Main.Modifier":{"args":[],"type":"{ category : Maybe.Maybe Main.Stat, target : Maybe.Maybe Main.Origin, section : Main.Section, value : Basics.Float, soulburn : Basics.Float }"},"Main.Skill":{"args":[],"type":"{ isPassive : Basics.Bool, soulburn : Basics.Int, soulburnEffect : Maybe.Maybe String.String, cooldown : Basics.Int, name : String.String, description : Maybe.Maybe String.String, modifiers : List.List Main.Modifier }"},"Main.Stats":{"args":[],"type":"{ atk : Basics.Int, hp : Basics.Int, spd : Basics.Int, def : Basics.Int, chc : Basics.Float, chd : Basics.Float, eff : Basics.Float, efr : Basics.Float }"}},"unions":{"Main.Msg":{"args":[],"tags":{"Loading":["String.String"],"GotHero":["Result.Result Http.Error Main.Hero"],"AddHeroButton":["Main.AddHeroButtonMsg"],"CloseModal":[],"HeroClicked":["String.String","Main.AddHeroButtonMsg"],"OpenModal":["Main.ModalMsg","Main.Item"],"Add":[],"UpdateStats":[]}},"Main.AddHeroButtonMsg":{"args":[],"tags":{"HideAddHeroDropdownMenu":[],"ShowAddHeroDropdownMenu":[]}},"Main.ModalMsg":{"args":[],"tags":{"OpenInput":[],"Change":[]}},"Main.Origin":{"args":[],"tags":{"Self":[],"Target":[]}},"Main.Section":{"args":[],"tags":{"Additive":[],"Multiplicative":[],"Pow":[]}},"Main.Slot":{"args":[],"tags":{"Weapon":[],"Helmet":[],"Armor":[],"Necklace":[],"Ring":[],"Boots":[],"Dummy":[]}},"Main.Stat":{"args":[],"tags":{"Atk":[],"AtkPercent":[],"HP":[],"HPPercent":[],"Def":[],"DefPercent":[],"ChC":[],"ChD":[],"Eff":[],"EfR":[],"Speed":[]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Basics.Float":{"args":[],"tags":{"Float":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}}}}})}});}(this));
