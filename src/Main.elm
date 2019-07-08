@@ -400,10 +400,10 @@ calculateDmgOfSkill heroStats skillMod =
             * (1.0 + toFloat heroStats.spd * skillMod.ownSpeed)
             * (1.0
                 + (if heroStats.chc >= 1 then
-                    heroStats.chd - 100.0
+                    heroStats.chd - 1.0
 
                    else
-                    heroStats.chc * (heroStats.chd - 100.0)
+                    heroStats.chc * (heroStats.chd - 1.0)
                   )
               )
         )
@@ -487,19 +487,19 @@ showStats stats name =
                     ]
                 , tr []
                     [ Html.td [] [ text "Critical Hit Chance" ]
-                    , Html.td [] [ text (String.fromFloat (stats.chc * 100) ++ "%") ]
+                    , Html.td [] [ text (String.fromInt (floor (stats.chc * 100)) ++ "%") ]
                     ]
                 , tr []
                     [ Html.td [] [ text "Critical Hit Damage" ]
-                    , Html.td [] [ text (String.fromFloat (stats.chd * 100) ++ "%") ]
+                    , Html.td [] [ text (String.fromInt (floor (stats.chd * 100)) ++ "%") ]
                     ]
                 , tr []
                     [ Html.td [] [ text "Effectiveness" ]
-                    , Html.td [] [ text (String.fromFloat (stats.eff * 100) ++ "%") ]
+                    , Html.td [] [ text (String.fromInt (floor (stats.eff * 100)) ++ "%") ]
                     ]
                 , tr []
                     [ Html.td [] [ text "Effect Resistance" ]
-                    , Html.td [] [ text (String.fromFloat (stats.efr * 100) ++ "%") ]
+                    , Html.td [] [ text (String.fromInt (floor (stats.efr * 100)) ++ "%") ]
                     ]
                 ]
             ]

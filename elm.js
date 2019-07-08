@@ -7148,7 +7148,7 @@ var Chadtech$elm_bool_extra$Bool$Extra$toString = function (bool) {
 var author$project$Main$calculateDmgOfSkill = F2(
 	function (heroStats, skillMod) {
 		return elm$core$Basics$floor(
-			((((((heroStats.atk * skillMod.ownAtk) + (heroStats.hp * skillMod.ownHP)) + (heroStats.def * skillMod.ownDef)) * skillMod.pow) * skillMod.defaultMulti) * (1.0 + (heroStats.spd * skillMod.ownSpeed))) * (1.0 + ((heroStats.chc >= 100) ? (heroStats.chd - 100.0) : ((heroStats.chc / 100.0) * (heroStats.chd - 100.0)))));
+			((((((heroStats.atk * skillMod.ownAtk) + (heroStats.hp * skillMod.ownHP)) + (heroStats.def * skillMod.ownDef)) * skillMod.pow) * skillMod.defaultMulti) * (1.0 + (heroStats.spd * skillMod.ownSpeed))) * (1.0 + ((heroStats.chc >= 1) ? (heroStats.chd - 1.0) : (heroStats.chc * (heroStats.chd - 1.0)))));
 	});
 var author$project$Main$SkillModifier = F7(
 	function (defaultMulti, pow, ownAtk, ownHP, ownDef, ownSpeed, enemyHP) {
@@ -7761,7 +7761,8 @@ var author$project$Main$showStats = F2(
 											_List_fromArray(
 												[
 													elm$html$Html$text(
-													elm$core$String$fromFloat(stats.chc * 100) + '%')
+													elm$core$String$fromInt(
+														elm$core$Basics$floor(stats.chc * 100)) + '%')
 												]))
 										])),
 									A2(
@@ -7782,7 +7783,8 @@ var author$project$Main$showStats = F2(
 											_List_fromArray(
 												[
 													elm$html$Html$text(
-													elm$core$String$fromFloat(stats.chd * 100) + '%')
+													elm$core$String$fromInt(
+														elm$core$Basics$floor(stats.chd * 100)) + '%')
 												]))
 										])),
 									A2(
@@ -7803,7 +7805,8 @@ var author$project$Main$showStats = F2(
 											_List_fromArray(
 												[
 													elm$html$Html$text(
-													elm$core$String$fromFloat(stats.eff * 100) + '%')
+													elm$core$String$fromInt(
+														elm$core$Basics$floor(stats.eff * 100)) + '%')
 												]))
 										])),
 									A2(
@@ -7824,7 +7827,8 @@ var author$project$Main$showStats = F2(
 											_List_fromArray(
 												[
 													elm$html$Html$text(
-													elm$core$String$fromFloat(stats.efr * 100) + '%')
+													elm$core$String$fromInt(
+														elm$core$Basics$floor(stats.efr * 100)) + '%')
 												]))
 										]))
 								]))
